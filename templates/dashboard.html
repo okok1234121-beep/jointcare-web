@@ -95,6 +95,24 @@
         <button onclick="logout()" class="text-xs text-zinc-700 underline">登出帳號</button>
     </div>
 
+    <!-- 邀請家屬確認彈窗 -->
+    <div id="invite-modal" class="fixed inset-0 bg-black/80 flex items-center justify-center z-[200] hidden">
+        <div class="bg-zinc-800 rounded-3xl p-8 w-11/12 max-w-sm border-2 border-zinc-700 shadow-2xl transform transition-all">
+            <div class="text-6xl text-center mb-4">💌</div>
+            <h3 class="text-3xl font-bold text-center text-white mb-4">發送邀請</h3>
+            <p class="text-lg text-zinc-300 text-center mb-8">系統將開啟 LINE APP，請在裡面選擇您的家屬進行傳送。</p>
+            
+            <div class="flex flex-col gap-4">
+                <!-- 這裡將由 JS 動態塞入 a 標籤確保不會被瀏覽器阻擋 -->
+                <div id="invite-btn-container"></div>
+                
+                <button onclick="closeInviteModal()" class="w-full bg-zinc-600 hover:bg-zinc-500 text-white font-bold py-4 rounded-2xl text-2xl transition-colors shadow-lg">
+                    取消並返回
+                </button>
+            </div>
+        </div>
+    </div>
+
     <script>
         function updateProfileUI(name, picUrl) {
             if (name) document.getElementById('user-name').innerText = name;
@@ -212,11 +230,20 @@
             // 將文字進行 URL 編碼
             const encodedMessage = encodeURIComponent(textMessage);
             
-            // 使用 LINE 的原生分享網址 (會直接喚醒設備上的 LINE APP)
+            // 使用 LINE 的原生分享網址
             const lineShareUrl = `https://line.me/R/msg/text/?${encodedMessage}`;
             
-            // 直接導向分享網址
-            window.location.href = lineShareUrl;
+            // 動態產生 a 標籤，確保開新視窗不被阻擋，同時原本頁面留在原地
+            const btnHtml = `<a href="${lineShareUrl}" target="_blank" onclick="closeInviteModal()" class="w-full bg-green-500 hover:bg-green-600 text-white font-bold py-4 rounded-2xl text-2xl transition-colors shadow-lg flex items-center justify-center gap-2">
+                <span>💬</span> 前往 LINE 傳送
+            </a>`;
+            
+            document.getElementById('invite-btn-container').innerHTML = btnHtml;
+            document.getElementById('invite-modal').classList.remove('hidden');
+        }
+
+        function closeInviteModal() {
+            document.getElementById('invite-modal').classList.add('hidden');
         }
     </script>
 </body>
