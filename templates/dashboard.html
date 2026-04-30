@@ -214,8 +214,6 @@
 
         function inviteFamily() {
             const uid = localStorage.getItem('dbUserId');
-            const userName = localStorage.getItem('userName') || "您的家人";
-            
             if (!uid) { 
                 alert("找不到您的專屬識別碼，請嘗試重新登入。"); 
                 return; 
@@ -223,23 +221,44 @@
             
             // 產生邀請網址
             const inviteUrl = `https://liff.line.me/2009890664-Vovdl9LN?invite_uid=${uid}&invite_type=family`;
-
-            // 準備要分享的純文字內容
-            const textMessage = `哈囉！我是 ${userName}，我正在使用「樂齡健康動」運動。\n邀請您成為我的專屬健康守護者，隨時接收我的運動戰績！\n\n👉 點擊連結接受邀請：\n${inviteUrl}`;
             
-            // 將文字進行 URL 編碼
-            const encodedMessage = encodeURIComponent(textMessage);
-            
-            // 使用 LINE 的原生分享網址
-            const lineShareUrl = `https://line.me/R/msg/text/?${encodedMessage}`;
-            
-            // 動態產生 a 標籤，確保開新視窗不被阻擋，同時原本頁面留在原地
-            const btnHtml = `<a href="${lineShareUrl}" target="_blank" onclick="closeInviteModal()" class="w-full bg-green-500 hover:bg-green-600 text-white font-bold py-4 rounded-2xl text-2xl transition-colors shadow-lg flex items-center justify-center gap-2">
-                <span>💬</span> 前往 LINE 傳送
-            </a>`;
+            // 動態產生按鈕，點擊後呼叫小視窗
+            const btnHtml = `<button onclick="sendFlexInvite('${inviteUrl}')" class="w-full bg-green-500 hover:bg-green-600 text-white font-bold py-4 rounded-2xl text-2xl transition-colors shadow-lg flex items-center justify-center gap-2">
+                <span>💌</span> 傳送邀請卡片
+            </button>`;
             
             document.getElementById('invite-btn-container').innerHTML = btnHtml;
             document.getElementById('invite-modal').classList.remove('hidden');
+        }
+
+        async function sendFlexInvite(inviteUrl) {
+            if (liff.isApiAvailable('shareTargetPicker')) {
+                try {
+                    const result = await liff.shareTargetPicker([{
+                        type: "flex",
+                        altText: "樂齡健康動 - 家屬綁定邀請",
+                        contents: {
+                            type: "bubble",
+                            hero: { type: "image", url: "https://images.unsplash.com/photo-1556740714-a8395b3bf30f?w=800&q=80", size: "full", aspectRatio: "20:13", aspectMode: "cover" },
+                            body: { type: "box", layout: "vertical", contents: [
+                                { type: "text", text: "樂齡健康動", weight: "bold", size: "xl", color: "#22c55e" },
+                                { type: "text", text: "邀請您成為專屬健康守護者，隨時接收長輩的運動戰績與進度！", wrap: true, margin: "md", color: "#666666" }
+                            ]},
+                            footer: { type: "box", layout: "vertical", contents: [
+                                { type: "button", style: "primary", color: "#22c55e", action: { type: "uri", label: "點此接受邀請", uri: inviteUrl } }
+                            ]}
+                        }
+                    }]);
+                    if (result) {
+                        alert("邀請卡片已成功發送！家屬點擊接受後即可綁定。");
+                        closeInviteModal(); // 發送成功後直接關閉彈窗，回到大廳
+                    }
+                } catch (error) { 
+                    console.error("發送取消或失敗", error); 
+                }
+            } else {
+                alert("您目前的瀏覽器不支援此功能，請使用 LINE 內部瀏覽器開啟！");
+            }
         }
 
         function closeInviteModal() {
