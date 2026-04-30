@@ -194,39 +194,29 @@
             window.location.replace("login.html");
         }
 
-        async function inviteFamily() {
+        function inviteFamily() {
             const uid = localStorage.getItem('dbUserId');
+            const userName = localStorage.getItem('userName') || "您的家人";
+            
             if (!uid) { 
                 alert("找不到您的專屬識別碼，請嘗試重新登入。"); 
                 return; 
             }
             
+            // 產生邀請網址
             const inviteUrl = `https://liff.line.me/2009890664-Vovdl9LN?invite_uid=${uid}&invite_type=family`;
 
-            if (liff.isApiAvailable('shareTargetPicker')) {
-                try {
-                    const result = await liff.shareTargetPicker([{
-                        type: "flex",
-                        altText: "樂齡健康動 - 家屬綁定邀請",
-                        contents: {
-                            type: "bubble",
-                            hero: { type: "image", url: "https://images.unsplash.com/photo-1556740714-a8395b3bf30f?w=800&q=80", size: "full", aspectRatio: "20:13", aspectMode: "cover" },
-                            body: { type: "box", layout: "vertical", contents: [
-                                { type: "text", text: "樂齡健康動", weight: "bold", size: "xl", color: "#22c55e" },
-                                { type: "text", text: "邀請您成為專屬健康守護者，隨時接收長輩的運動戰績與進度！", wrap: true, margin: "md", color: "#666666" }
-                            ]},
-                            footer: { type: "box", layout: "vertical", contents: [
-                                { type: "button", style: "primary", color: "#22c55e", action: { type: "uri", label: "點此接受邀請", uri: inviteUrl } }
-                            ]}
-                        }
-                    }]);
-                    if (result) alert("邀請卡片已成功發送！");
-                } catch (error) { 
-                    console.error("發送取消或失敗", error); 
-                }
-            } else {
-                alert("請在手機的 LINE 內部執行此功能。");
-            }
+            // 準備要分享的純文字內容
+            const textMessage = `哈囉！我是 ${userName}，我正在使用「樂齡健康動」運動。\n邀請您成為我的專屬健康守護者，隨時接收我的運動戰績！\n\n👉 點擊連結接受邀請：\n${inviteUrl}`;
+            
+            // 將文字進行 URL 編碼
+            const encodedMessage = encodeURIComponent(textMessage);
+            
+            // 使用 LINE 的原生分享網址 (會直接喚醒設備上的 LINE APP)
+            const lineShareUrl = `https://line.me/R/msg/text/?${encodedMessage}`;
+            
+            // 直接導向分享網址
+            window.location.href = lineShareUrl;
         }
     </script>
 </body>
