@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>樂齡健康動 - 系統登入</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script charset="utf-8" src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+    <style>
+        body { background-color: #1a1a1a; color: #ffffff; font-family: 'Microsoft JhengHei', sans-serif; }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col items-center justify-center relative p-6">
+
+    <div class="flex flex-col items-center justify-center z-10 text-center">
+        <div class="text-[6rem] mb-4 animate-bounce">🏃</div>
+        <h1 class="text-4xl font-black tracking-widest mb-2 text-white">樂齡健康動</h1>
+        <p id="loadingText" class="text-xl text-zinc-400 font-bold tracking-widest animate-pulse mt-4">
+            正在啟動系統環境...
+        </p>
+    </div>
+
+    <div id="errorBox" class="hidden mt-8 bg-red-900/50 border-2 border-red-500 rounded-xl p-6 text-center max-w-md w-full z-20">
+        <h2 class="text-2xl font-bold text-red-400 mb-2">連線或授權失敗</h2>
+        <p id="errorMsg" class="text-red-200">請確認您的網路狀態，或在 LINE 內部開啟此連結。</p>
+    </div>
+
+    <script>
+        function showError(message) {
+            document.getElementById('loadingText').classList.add('hidden');
+            document.getElementById('errorBox').classList.remove('hidden');
+            document.getElementById('errorMsg').innerText = message;
+        }
+
+        async function main() {
+            try {
+                // 初始化 LIFF
+                await liff.init({ liffId: "2009890664-Vovdl9LN" });
+
+                if (liff.isLoggedIn()) {
+                    document.getElementById('loadingText').innerText = "讀取您的 LINE 檔案中...";
+                    const profile = await liff.getProfile();
+                    
+                    if (!profile || !profile.userId) throw new Error("無法取得有效的 LINE UID，請重試。");
+
+                    // 擷取網址中的 invite_uid 與 invite_type
+                    const urlParams = new URLSearchParams(window.location.search);
+                    const inviteUid = urlParams.get('invite_uid');
+                    const inviteType = urlParams.get('invite_type') || 'friend';
+
+                    document.getElementById('loadingText').innerText = "伺服器驗證與綁定中...";
+
+                    const response = await fetch('/api/verify-liff', {
+                        method: 'POST',
+                        headers: { 
+                            'Content-Type': 'application/json',
+                            // 加入此標頭以繞過 ngrok 免費版的攔截畫面
+                            'ngrok-skip-browser-warning': 'true' 
+                        },
+                        body: JSON.stringify({
+                            line_user_id: profile.userId,
+                            display_name: profile.displayName,
+                            picture_url: profile.pictureUrl,
+                            invite_uid: inviteUid,
+                            invite_type: inviteType
+                        })
+                    });
+
+                    if (response.ok) {
+                        const data = await response.json();
+                        if (data.success) {
+                            localStorage.setItem('dbUserId', data.dbUserId);
+                            
+                            // 判斷綁定結果與類型
+                            if (data.bound_success && data.relation_type === 'family') {
+                                alert("已成功與長輩綁定連線！未來將自動接收戰績通知。");
+                                liff.closeWindow(); // 關閉視窗，讓家屬退回聊天室
+                            } else {
+                                // 維持導向系統大廳
+                                window.location.href = 'dashboard.html';
+                            }
+                        } else {
+                            showError("後端拒絕登入：" + data.message);
+                        }
+                    } else {
+                        showError(`伺服器回應錯誤 (${response.status})，請聯絡管理員。`);
+                    }
+                } else {
+                    document.getElementById('loadingText').innerText = "導向 LINE 授權畫面中...";
+                    liff.login();
+                }
+            } catch (err) {
+                console.error("LIFF 啟動失敗:", err);
+                showError(err.message || "發生未知錯誤，請重新整理網頁。");
+            }
+        }
+        main();
+    </script>
+</body>
+</html>

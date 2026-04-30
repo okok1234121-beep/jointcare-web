@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>樂齡健康動 - 主選單</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script charset="utf-8" src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+    <style>
+        body { 
+            background-color: #1a1a1a; 
+            color: #ffffff; 
+            font-family: 'Microsoft JhengHei', sans-serif;
+            overflow-x: hidden;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .giant-btn {
+            transition: transform 0.1s;
+            box-shadow: 0 10px 0 rgba(0, 0, 0, 0.5);
+        }
+        .giant-btn:active {
+            transform: translateY(6px);
+            box-shadow: 0 4px 0 rgba(0, 0, 0, 0.5);
+        }
+        .status-link:active {
+            opacity: 0.7;
+            transform: scale(0.98);
+        }
+        .hidden-feature {
+            display: none !important;
+        }
+    </style>
+</head>
+<body class="p-6 min-h-screen flex flex-col relative">
+
+    <div onclick="checkConnectionAndGo()" class="status-link bg-zinc-800 p-5 rounded-3xl mb-8 flex items-center gap-5 border-2 border-zinc-700 shadow-lg cursor-pointer">
+        <div id="profile-pic-container" class="w-16 h-16 bg-zinc-600 rounded-full flex items-center justify-center text-3xl border-2 border-green-500 shadow-inner overflow-hidden flex-shrink-0">
+            👤
+        </div>
+        <div class="flex-1 min-w-0">
+            <h2 class="text-3xl font-bold mb-1 truncate">您好，<span id="user-name" class="text-white">長輩</span></h2>
+            <div class="flex items-center gap-2">
+                <p class="text-lg font-bold" id="device-status">讀取中...</p>
+                <span id="reconnect-hint" class="hidden text-sm bg-red-500 px-2 py-1 rounded-lg animate-pulse">點我連線</span>
+            </div>
+        </div>
+        <div class="text-zinc-500 text-3xl">〉</div>
+    </div>
+
+    <div class="flex-1 flex flex-col justify-center gap-8 w-full max-w-md mx-auto pb-8" id="menu-container">
+        
+        <button id="btn-measure" onclick="goTo('measure')" class="giant-btn hidden-feature w-full bg-indigo-500 rounded-[2rem] p-8 flex items-center gap-6 border-b-[10px] border-indigo-700">
+            <div class="text-7xl bg-indigo-400 p-4 rounded-2xl shadow-inner">🩺</div>
+            <div class="text-left">
+                <h3 class="text-4xl font-bold text-white mb-2 tracking-wide">健康測量</h3>
+                <p class="text-2xl text-indigo-100 font-bold">多軸專屬數據追蹤</p>
+            </div>
+        </button>
+
+        <button onclick="goTo('games')" class="giant-btn w-full bg-orange-500 rounded-[2rem] p-8 flex items-center gap-6 border-b-[10px] border-orange-700">
+            <div class="text-7xl bg-orange-400 p-4 rounded-2xl shadow-inner">🎮</div>
+            <div class="text-left">
+                <h3 class="text-4xl font-bold text-white mb-2 tracking-wide">開始運動</h3>
+                <p class="text-2xl text-orange-200 font-bold">玩遊戲活動筋骨</p>
+            </div>
+        </button>
+
+        <button onclick="goTo('friends')" class="giant-btn w-full bg-emerald-500 rounded-[2rem] p-8 flex items-center gap-6 border-b-[10px] border-emerald-700">
+            <div class="text-7xl bg-emerald-400 p-4 rounded-2xl shadow-inner">👥</div>
+            <div class="text-left">
+                <h3 class="text-4xl font-bold text-white mb-2 tracking-wide">我的好友</h3>
+                <p class="text-2xl text-emerald-100 font-bold">看看大家多厲害</p>
+            </div>
+        </button>
+
+        <button onclick="goTo('trophies')" class="giant-btn w-full bg-yellow-500 rounded-[2rem] p-8 flex items-center gap-6 border-b-[10px] border-yellow-700">
+            <div class="text-7xl bg-yellow-400 p-4 rounded-2xl shadow-inner">🏆</div>
+            <div class="text-left">
+                <h3 class="text-4xl font-bold text-yellow-900 mb-2 tracking-wide">我的獎盃</h3>
+                <p class="text-2xl text-yellow-800 font-bold">您收集的榮耀</p>
+            </div>
+        </button>
+
+        <button onclick="inviteFamily()" class="giant-btn w-full bg-pink-500 rounded-[2rem] p-8 flex items-center gap-6 border-b-[10px] border-pink-700 mt-2">
+            <div class="text-7xl bg-pink-400 p-4 rounded-2xl shadow-inner">💌</div>
+            <div class="text-left">
+                <h3 class="text-4xl font-bold text-white mb-2 tracking-wide">邀請家屬</h3>
+                <p class="text-2xl text-pink-100 font-bold">分享戰績給家人</p>
+            </div>
+        </button>
+
+    </div>
+
+    <div class="fixed bottom-2 left-0 w-full flex justify-center gap-8 z-[100]">
+        <button onclick="logout()" class="text-xs text-zinc-700 underline">登出帳號</button>
+    </div>
+
+    <script>
+        function updateProfileUI(name, picUrl) {
+            if (name) document.getElementById('user-name').innerText = name;
+            if (picUrl) {
+                const picContainer = document.getElementById('profile-pic-container');
+                picContainer.innerHTML = `<img src="${picUrl}" alt="頭像" class="w-full h-full object-cover">`;
+            }
+        }
+
+        window.onload = async () => {
+            // 初始化 LIFF 系統並抓取正確個資
+            try {
+                await liff.init({ liffId: "2009890664-Vovdl9LN" });
+                if (liff.isLoggedIn()) {
+                    const profile = await liff.getProfile();
+                    updateProfileUI(profile.displayName, profile.pictureUrl);
+                    localStorage.setItem('userName', profile.displayName);
+                    localStorage.setItem('userPic', profile.pictureUrl);
+                } else {
+                    window.location.replace("login.html");
+                    return;
+                }
+            } catch (err) {
+                console.error("LIFF Init Error:", err);
+            }
+
+            renderDeviceStatus();
+
+            // ✨ 核心修復：大廳自動判定與導向
+            const mode = localStorage.getItem('deviceMode');
+            if (!mode) {
+                document.getElementById('device-status').innerText = "尚未連線，準備導向...";
+                document.getElementById('device-status').className = "text-lg font-bold text-yellow-500";
+                
+                // 給予 1.5 秒緩衝後自動跳轉 main.html
+                setTimeout(() => {
+                    window.location.href = "main.html";
+                }, 1500);
+            }
+        };
+
+        function renderDeviceStatus() {
+            const mode = localStorage.getItem('deviceMode');
+            const statusEl = document.getElementById('device-status');
+            const hintEl = document.getElementById('reconnect-hint');
+            const measureBtn = document.getElementById('btn-measure');
+            
+            if (!mode) {
+                statusEl.innerText = "尚未連線運動設備";
+                statusEl.className = "text-lg font-bold text-red-500";
+                hintEl.classList.remove('hidden');
+                measureBtn.classList.add('hidden-feature');
+            } else if (mode === 'multi') {
+                statusEl.innerText = "已連線：多軸設備 💪";
+                statusEl.className = "text-lg font-bold text-blue-400";
+                hintEl.classList.add('hidden');
+                measureBtn.classList.remove('hidden-feature');
+            } else if (mode === 'dual') {
+                statusEl.innerText = "已連線：雙設備 🦯🦯";
+                statusEl.className = "text-lg font-bold text-green-400";
+                hintEl.classList.add('hidden');
+                measureBtn.classList.add('hidden-feature');
+            } else if (mode === 'single') {
+                statusEl.innerText = "已連線：單軸設備 🦯";
+                statusEl.className = "text-lg font-bold text-green-400";
+                hintEl.classList.add('hidden');
+                measureBtn.classList.add('hidden-feature');
+            }
+        }
+
+        function checkConnectionAndGo() {
+            const mode = localStorage.getItem('deviceMode');
+            if (!mode) {
+                window.location.href = "main.html";
+            } else {
+                alert("設備已連線，可以開始運動囉！\n(測試階段：若要重新連線，請點擊下方登出帳號)");
+            }
+        }
+
+        function goTo(pageName) {
+            const pageMap = {
+                'games': 'games.html',
+                'measure': 'measure.html',
+                'friends': 'friends.html',
+                'trophies': 'trophies.html'
+            };
+
+            if (pageMap[pageName]) {
+                window.location.href = pageMap[pageName];
+            } else {
+                alert(`找不到指定頁面：「${pageName}」`);
+            }
+        }
+
+        function logout() {
+            localStorage.clear();
+            window.location.replace("login.html");
+        }
+
+        async function inviteFamily() {
+            const uid = localStorage.getItem('dbUserId');
+            if (!uid) { 
+                alert("找不到您的專屬識別碼，請嘗試重新登入。"); 
+                return; 
+            }
+            
+            const inviteUrl = `https://liff.line.me/2009890664-Vovdl9LN?invite_uid=${uid}&invite_type=family`;
+
+            if (liff.isApiAvailable('shareTargetPicker')) {
+                try {
+                    const result = await liff.shareTargetPicker([{
+                        type: "flex",
+                        altText: "樂齡健康動 - 家屬綁定邀請",
+                        contents: {
+                            type: "bubble",
+                            hero: { type: "image", url: "https://images.unsplash.com/photo-1556740714-a8395b3bf30f?w=800&q=80", size: "full", aspectRatio: "20:13", aspectMode: "cover" },
+                            body: { type: "box", layout: "vertical", contents: [
+                                { type: "text", text: "樂齡健康動", weight: "bold", size: "xl", color: "#22c55e" },
+                                { type: "text", text: "邀請您成為專屬健康守護者，隨時接收長輩的運動戰績與進度！", wrap: true, margin: "md", color: "#666666" }
+                            ]},
+                            footer: { type: "box", layout: "vertical", contents: [
+                                { type: "button", style: "primary", color: "#22c55e", action: { type: "uri", label: "點此接受邀請", uri: inviteUrl } }
+                            ]}
+                        }
+                    }]);
+                    if (result) alert("邀請卡片已成功發送！");
+                } catch (error) { 
+                    console.error("發送取消或失敗", error); 
+                }
+            } else {
+                alert("請在手機的 LINE 內部執行此功能。");
+            }
+        }
+    </script>
+</body>
+</html>

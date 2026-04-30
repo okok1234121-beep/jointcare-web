@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <title>設備連線</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>.step { display: none; } .active { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 90vh; }</style>
+</head>
+<body class="bg-[#1a1a1a] text-white p-6">
+    <div id="s1" class="step active">
+        <h1 class="text-4xl text-green-400 mb-8">第一步</h1>
+        <p class="text-3xl mb-10 text-center">請拿起設備<br><span class="text-yellow-400 font-bold">「輕點兩下」</span></p>
+        <button onclick="go(2)" class="bg-green-500 px-10 py-5 rounded-2xl text-3xl font-bold">點好了</button>
+    </div>
+    <div id="s2" class="step">
+        <h1 class="text-4xl text-green-400 mb-8">第二步</h1>
+        <button onclick="window.open('https://youtube.com/...')" class="bg-red-600 px-10 py-5 rounded-2xl text-2xl font-bold mb-6">觀看穿戴教學</button>
+        <p class="text-2xl text-zinc-400 mb-8">請確定束環已穿戴正確</p>
+        <button onclick="go(3)" class="bg-green-500 px-10 py-5 rounded-2xl text-3xl font-bold">我穿好了</button>
+    </div>
+    <div id="s3" class="step">
+        <h1 class="text-4xl text-green-400 mb-8">第三步</h1>
+        <p class="text-3xl mb-10">請問穿戴在哪一邊？</p>
+        <div class="flex gap-6 w-full max-w-md">
+            <button onclick="setL(4, 'L')" class="flex-1 bg-blue-600 py-8 rounded-2xl text-3xl font-bold">左邊</button>
+            <button onclick="setL(4, 'R')" class="flex-1 bg-orange-600 py-8 rounded-2xl text-3xl font-bold">右邊</button>
+        </div>
+    </div>
+    <div id="s4" class="step">
+        <h1 class="text-4xl text-green-400 mb-8">第四步</h1>
+        <p class="text-3xl mb-10 text-center">請確認手機<br><span class="text-blue-400 font-bold">「藍牙」</span>已開啟</p>
+        <button onclick="go(5)" class="bg-green-500 px-10 py-5 rounded-2xl text-3xl font-bold">已經打開了</button>
+    </div>
+    <div id="s5" class="step">
+        <h1 class="text-4xl text-white mb-8">最後一步</h1>
+        <button onclick="conn()" class="bg-green-500 px-10 py-5 rounded-2xl text-3xl font-bold">連結藍芽</button>
+    </div>
+
+    <script>
+        function go(n) { document.querySelectorAll('.step').forEach(s => s.classList.remove('active')); document.getElementById('s'+n).classList.add('active'); }
+        function setL(n, l) { localStorage.setItem('sensorLimb', l); go(n); }
+        async function conn() {
+            try {
+                // 模擬或執行藍牙連線
+                const device = await navigator.bluetooth.requestDevice({ 
+                    filters: [{ namePrefix: 'KneeHow' }], 
+                    optionalServices: ['00000001-0000-1000-8000-00805f9b34fb'] 
+                });
+                
+                // 將第一台設備的 ID 存起來，避免第二台重複連線
+                if (device.id) {
+                    localStorage.setItem('firstDeviceId', device.id);
+                }
+                
+                // ✨ 核心修復：配對成功後，將狀態存入 localStorage，讓大廳知道設備已就緒
+                localStorage.setItem('deviceMode', 'single'); 
+                
+                window.location.href = "dashboard.html";
+            } catch (e) { 
+                alert("連線取消或失敗，請重新嘗試。"); 
+            }
+        }
+    </script>
+</body>
+</html>
