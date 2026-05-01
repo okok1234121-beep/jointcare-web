@@ -75,9 +75,12 @@
                             if (data.bound_success && data.relation_type === 'family') {
                                 alert("已成功與長輩綁定連線！未來將自動接收戰績通知。");
                                 liff.closeWindow(); // 關閉視窗，讓家屬退回聊天室
+                            } else if (data.bound_success && data.relation_type === 'friend') {
+                                alert("您已成功與 " + (data.inviter_name || "好友") + " 成為好友！");
+                                liff.closeWindow(); // 關閉視窗，退回 LINE 對話
                             } else {
-                                // 維持導向系統大廳 (升級版 SPA)
-                                window.location.href = 'app_core.html';
+                                // 維持導向系統大廳 (並帶上 login=1 參數以強制觸發教學)
+                                window.location.href = 'app_core.html?login=1';
                             }
                         } else {
                             showError("後端拒絕登入：" + data.message);

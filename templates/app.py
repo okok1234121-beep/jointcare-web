@@ -88,31 +88,45 @@ def verify_liff():
     pic = data.get('picture_url')
     display_name = data.get('display_name')
     invite_uid = data.get('invite_uid')
-    # 接收前端傳來的邀請類型，預設為 friend
-    invite_type = data.get('invite_type', 'friend') 
+    invite_type = data.get('invite_type', 'friend')
     
     if not uid:
         return jsonify({'success': False, 'message': '缺少必要參數 UID'}), 400
-        
+
+    # 建立關聯並寫入 relation_type
+    inviter_name = "系統用戶"
     conn = get_db_connection()
     bound_success = False
     try:
         with conn.cursor() as cursor:
+            # 獲取邀請人姓名
+            if invite_uid:
+                cursor.execute("SELECT Name FROM User_profiles WHERE User_id = %s", (invite_uid,))
+                res = cursor.fetchone()
+                if res: inviter_name = res['Name']
+
             cursor.execute("SELECT auth_id, user_id FROM line_accounts WHERE line_user_id = %s", (uid,))
             user = cursor.fetchone()
             
             if not user:
-                return jsonify({'success': False, 'message': f'您的 LINE 尚未綁定系統帳號。\n您的新 UID 是：{uid}\n請將這串代碼複製並貼到資料庫中。'}), 401
+                # [自動註冊新用戶]
+                # 1. 建立基礎個人檔案
+                cursor.execute("INSERT INTO User_profiles (Name, Gender, Age, Weight) VALUES (%s, 'M', 65, 60)", (display_name,))
+                db_user_id = cursor.lastrowid
+                # 2. 建立 LINE 帳號連結
+                cursor.execute("""
+                    INSERT INTO line_accounts (line_user_id, user_id, display_name, picture_url, last_login)
+                    VALUES (%s, %s, %s, %s, NOW())
+                """, (uid, db_user_id, display_name, pic))
+            else:
+                db_user_id = user['user_id']
+                cursor.execute("""
+                    UPDATE line_accounts 
+                    SET picture_url = %s, display_name = %s, last_login = NOW() 
+                    WHERE line_user_id = %s
+                """, (pic, display_name, uid))
             
-            db_user_id = user['user_id']
-            
-            cursor.execute("""
-                UPDATE line_accounts 
-                SET picture_url = %s, display_name = %s, last_login = NOW() 
-                WHERE line_user_id = %s
-            """, (pic, display_name, uid))
-            
-            # 建立關聯並寫入 relation_type
+            # 建立關聯
             if invite_uid and str(invite_uid) != str(db_user_id):
                 cursor.execute("""
                     INSERT INTO friendships (requester_id, receiver_id, status, relation_type, created_at, updated_at) 
@@ -126,7 +140,8 @@ def verify_liff():
                 'success': True, 
                 'dbUserId': db_user_id, 
                 'bound_success': bound_success,
-                'relation_type': invite_type if bound_success else 'none'
+                'relation_type': invite_type if bound_success else 'none',
+                'inviter_name': inviter_name
             })
             
     except Exception as e:

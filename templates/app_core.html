@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="zh-TW">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
@@ -7,53 +8,124 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script charset="utf-8" src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
     <style>
-        body { 
-            background-color: #1a1a1a; 
-            color: #ffffff; 
+        body {
+            background-color: #1a1a1a;
+            color: #ffffff;
             font-family: 'Microsoft JhengHei', sans-serif;
             overflow-x: hidden;
             -webkit-tap-highlight-color: transparent;
         }
+
         /* Dashboard styles */
-        .giant-btn { transition: transform 0.1s; box-shadow: 0 10px 0 rgba(0, 0, 0, 0.5); }
-        .giant-btn:active { transform: translateY(6px); box-shadow: 0 4px 0 rgba(0, 0, 0, 0.5); }
-        .status-link:active { opacity: 0.7; transform: scale(0.98); }
-        .hidden-feature { display: none !important; }
+        .giant-btn {
+            transition: transform 0.1s;
+            box-shadow: 0 10px 0 rgba(0, 0, 0, 0.5);
+        }
+
+        .giant-btn:active {
+            transform: translateY(6px);
+            box-shadow: 0 4px 0 rgba(0, 0, 0, 0.5);
+        }
+
+        .status-link:active {
+            opacity: 0.7;
+            transform: scale(0.98);
+        }
+
+        .hidden-feature {
+            display: none !important;
+        }
 
         /* Main (Connect) styles */
-        .step { display: none; } 
-        .step.active { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 90vh; }
+        .step {
+            display: none;
+        }
+
+        .step.active {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 90vh;
+        }
 
         /* Games styles */
-        .game-card { transition: transform 0.1s, box-shadow: 0 10px 0 rgba(0,0,0,0.5); }
-        .game-card:active { transform: translateY(6px); box-shadow: 0 0px 0 transparent !important; }
-        .no-scrollbar::-webkit-scrollbar { display: none; }
-        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        .game-card {
+            transition: transform 0.1s, box-shadow: 0 10px 0 rgba(0, 0, 0, 0.5);
+        }
+
+        .game-card:active {
+            transform: translateY(6px);
+            box-shadow: 0 0px 0 transparent !important;
+        }
+
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
 
         /* Exercise styles */
-        .btn-press { transition: transform 0.1s; box-shadow: 0 6px 0 rgba(0, 0, 0, 0.5); }
-        .btn-press:active:not(:disabled) { transform: translateY(4px); box-shadow: 0 2px 0 rgba(0, 0, 0, 0.5); }
-        @keyframes slideUp { 0% { transform: translateY(100px); opacity: 0; } 100% { transform: translateY(0); opacity: 1; } }
-        .toast-enter { animation: slideUp 0.5s ease-out forwards; }
+        .btn-press {
+            transition: transform 0.1s;
+            box-shadow: 0 6px 0 rgba(0, 0, 0, 0.5);
+        }
+
+        .btn-press:active:not(:disabled) {
+            transform: translateY(4px);
+            box-shadow: 0 2px 0 rgba(0, 0, 0, 0.5);
+        }
+
+        @keyframes slideUp {
+            0% {
+                transform: translateY(100px);
+                opacity: 0;
+            }
+
+            100% {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .toast-enter {
+            animation: slideUp 0.5s ease-out forwards;
+        }
 
         /* SPA View Container Logic */
-        .view-container { display: none; width: 100%; min-height: 100vh; }
-        .view-container.active-view { display: flex; flex-direction: column; }
+        .view-container {
+            display: none;
+            width: 100%;
+            min-height: 100vh;
+        }
+
+        .view-container.active-view {
+            display: flex;
+            flex-direction: column;
+        }
     </style>
 </head>
+
 <body class="relative min-w-[320px]">
 
     <!-- 全局提示框 (家人通知) -->
-    <div id="family-notify-toast" class="hidden fixed bottom-8 left-0 right-0 px-6 z-[300] flex justify-center pointer-events-none">
-        <div class="bg-green-600/95 backdrop-blur-sm border-2 border-green-400 text-white px-8 py-5 rounded-full shadow-2xl flex items-center gap-4">
+    <div id="family-notify-toast"
+        class="hidden fixed bottom-8 left-0 right-0 px-6 z-[300] flex justify-center pointer-events-none">
+        <div
+            class="bg-green-600/95 backdrop-blur-sm border-2 border-green-400 text-white px-8 py-5 rounded-full shadow-2xl flex items-center gap-4">
             <span class="text-3xl">📱</span>
             <span class="text-2xl font-bold tracking-wide" id="toast-msg">好成績已經自動傳送給家人囉！</span>
         </div>
     </div>
 
     <!-- 警告提示框 (斷線專用) -->
-    <div id="warning-toast" class="hidden fixed top-8 left-0 right-0 px-6 z-[300] flex justify-center pointer-events-none">
-        <div class="bg-red-600/95 backdrop-blur-sm border-2 border-red-400 text-white px-8 py-4 rounded-3xl shadow-2xl flex items-center gap-5">
+    <div id="warning-toast"
+        class="hidden fixed top-8 left-0 right-0 px-6 z-[300] flex justify-center pointer-events-none">
+        <div
+            class="bg-red-600/95 backdrop-blur-sm border-2 border-red-400 text-white px-8 py-4 rounded-3xl shadow-2xl flex items-center gap-5">
             <span class="text-4xl">⚠️</span>
             <div class="flex flex-col">
                 <span class="text-2xl font-bold tracking-wide" id="warning-msg">設備斷線警告！</span>
@@ -63,80 +135,102 @@
     </div>
 
     <!-- ==================== VIEW: DASHBOARD ==================== -->
-    <div id="view-dashboard" class="view-container active-view p-8 pb-10 h-screen overflow-hidden">
-        
+    <div id="view-dashboard" class="view-container p-8 pb-10 h-screen overflow-hidden">
+
         <!-- 頂部：個人資訊與狀態列 -->
-        <div onclick="checkConnectionAndGo()" class="status-link bg-zinc-800 p-5 rounded-3xl mb-8 flex items-center gap-5 border-2 border-zinc-700 shadow-lg cursor-pointer relative">
-            <div id="profile-pic-container" class="w-16 h-16 bg-zinc-600 rounded-full flex items-center justify-center text-3xl border-2 border-green-500 shadow-inner overflow-hidden flex-shrink-0">
+        <div onclick="checkConnectionAndGo()"
+            class="status-link bg-zinc-800 p-5 rounded-3xl mb-8 flex items-center gap-5 border-2 border-zinc-700 shadow-lg cursor-pointer relative">
+            <div id="profile-pic-container"
+                class="w-16 h-16 bg-zinc-600 rounded-full flex items-center justify-center text-3xl border-2 border-green-500 shadow-inner overflow-hidden flex-shrink-0">
                 👤
             </div>
             <div class="flex-1 min-w-0">
                 <h2 class="text-3xl font-bold mb-1 truncate">您好，<span id="user-name" class="text-white">長輩</span></h2>
                 <div class="flex items-center gap-2">
                     <p class="text-lg font-bold" id="device-status">讀取中...</p>
-                    <span id="reconnect-hint" class="hidden text-sm bg-red-500 px-2 py-1 rounded-lg animate-pulse">點我連線</span>
+                    <span id="reconnect-hint"
+                        class="hidden text-sm bg-red-500 px-2 py-1 rounded-lg animate-pulse">點我連線</span>
                 </div>
             </div>
             <!-- 登出按鈕移至右側 -->
-            <button onclick="event.stopPropagation(); logout()" class="bg-red-900/40 hover:bg-red-800 text-red-300 px-6 py-3 rounded-2xl text-xl font-bold border-2 border-red-800/50 transition-colors z-10 flex-shrink-0 shadow-inner">
+            <button onclick="event.stopPropagation(); logout()"
+                class="bg-red-900/40 hover:bg-red-800 text-red-300 px-6 py-3 rounded-2xl text-xl font-bold border-2 border-red-800/50 transition-colors z-10 flex-shrink-0 shadow-inner">
                 登出帳號
             </button>
         </div>
 
         <!-- 底部：功能按鈕 (橫向排列) -->
-        <div class="flex-1 flex flex-row items-center justify-center gap-6 w-full max-w-[95%] mx-auto" id="menu-container">
-            
-            <button id="btn-measure" onclick="goTo('measure')" class="giant-btn hidden-feature flex-1 min-w-[200px] h-full max-h-[400px] bg-indigo-500 rounded-[2rem] p-6 flex flex-col items-center justify-center gap-6 border-b-[10px] border-indigo-700">
-                <div class="text-[5rem] bg-indigo-400 w-32 h-32 rounded-3xl flex items-center justify-center shadow-inner mb-2">🩺</div>
+        <div class="flex-1 flex flex-row items-center justify-center gap-6 w-full max-w-[95%] mx-auto"
+            id="menu-container">
+
+            <button id="btn-measure" onclick="goTo('measure')"
+                class="giant-btn hidden-feature flex-1 min-w-[200px] h-full max-h-[400px] bg-indigo-500 rounded-[2rem] p-6 flex flex-col items-center justify-center gap-6 border-b-[10px] border-indigo-700">
+                <div
+                    class="text-[5rem] bg-indigo-400 w-32 h-32 rounded-3xl flex items-center justify-center shadow-inner mb-2">
+                    🩺</div>
                 <div class="text-center">
                     <h3 class="text-4xl font-bold text-white mb-2 tracking-wide whitespace-nowrap">健康測量</h3>
                     <p class="text-xl text-indigo-100 font-bold whitespace-nowrap">多軸專屬數據追蹤</p>
                 </div>
             </button>
 
-            <button onclick="goTo('games')" class="giant-btn flex-1 min-w-[200px] h-full max-h-[400px] bg-orange-500 rounded-[2rem] p-6 flex flex-col items-center justify-center gap-6 border-b-[10px] border-orange-700">
-                <div class="text-[5rem] bg-orange-400 w-32 h-32 rounded-3xl flex items-center justify-center shadow-inner mb-2">🎮</div>
+            <button onclick="goTo('games')"
+                class="giant-btn flex-1 min-w-[200px] h-full max-h-[400px] bg-orange-500 rounded-[2rem] p-6 flex flex-col items-center justify-center gap-6 border-b-[10px] border-orange-700">
+                <div
+                    class="text-[5rem] bg-orange-400 w-32 h-32 rounded-3xl flex items-center justify-center shadow-inner mb-2">
+                    🎮</div>
                 <div class="text-center">
                     <h3 class="text-4xl font-bold text-white mb-2 tracking-wide whitespace-nowrap">開始運動</h3>
                     <p class="text-xl text-orange-200 font-bold whitespace-nowrap">玩遊戲活動筋骨</p>
                 </div>
             </button>
 
-            <button onclick="goTo('friends')" class="giant-btn flex-1 min-w-[200px] h-full max-h-[400px] bg-emerald-500 rounded-[2rem] p-6 flex flex-col items-center justify-center gap-6 border-b-[10px] border-emerald-700">
-                <div class="text-[5rem] bg-emerald-400 w-32 h-32 rounded-3xl flex items-center justify-center shadow-inner mb-2">👥</div>
+            <button onclick="goTo('friends')"
+                class="giant-btn flex-1 min-w-[200px] h-full max-h-[400px] bg-emerald-500 rounded-[2rem] p-6 flex flex-col items-center justify-center gap-6 border-b-[10px] border-emerald-700">
+                <div
+                    class="text-[5rem] bg-emerald-400 w-32 h-32 rounded-3xl flex items-center justify-center shadow-inner mb-2">
+                    👥</div>
                 <div class="text-center">
                     <h3 class="text-4xl font-bold text-white mb-2 tracking-wide whitespace-nowrap">我的好友</h3>
                     <p class="text-xl text-emerald-100 font-bold whitespace-nowrap">看看大家多厲害</p>
                 </div>
             </button>
 
-            <button onclick="goTo('trophies')" class="giant-btn flex-1 min-w-[200px] h-full max-h-[400px] bg-yellow-500 rounded-[2rem] p-6 flex flex-col items-center justify-center gap-6 border-b-[10px] border-yellow-700">
-                <div class="text-[5rem] bg-yellow-400 w-32 h-32 rounded-3xl flex items-center justify-center shadow-inner mb-2">🏆</div>
+            <button onclick="goTo('trophies')"
+                class="giant-btn flex-1 min-w-[200px] h-full max-h-[400px] bg-yellow-500 rounded-[2rem] p-6 flex flex-col items-center justify-center gap-6 border-b-[10px] border-yellow-700">
+                <div
+                    class="text-[5rem] bg-yellow-400 w-32 h-32 rounded-3xl flex items-center justify-center shadow-inner mb-2">
+                    🏆</div>
                 <div class="text-center">
                     <h3 class="text-4xl font-bold text-yellow-900 mb-2 tracking-wide whitespace-nowrap">我的獎盃</h3>
                     <p class="text-xl text-yellow-800 font-bold whitespace-nowrap">您收集的榮耀</p>
                 </div>
             </button>
 
-            <button onclick="inviteFamily()" class="giant-btn flex-1 min-w-[200px] h-full max-h-[400px] bg-pink-500 rounded-[2rem] p-6 flex flex-col items-center justify-center gap-6 border-b-[10px] border-pink-700">
-                <div class="text-[5rem] bg-pink-400 w-32 h-32 rounded-3xl flex items-center justify-center shadow-inner mb-2">💌</div>
+            <button onclick="inviteFamily()"
+                class="giant-btn flex-1 min-w-[200px] h-full max-h-[400px] bg-pink-500 rounded-[2rem] p-6 flex flex-col items-center justify-center gap-6 border-b-[10px] border-pink-700">
+                <div
+                    class="text-[5rem] bg-pink-400 w-32 h-32 rounded-3xl flex items-center justify-center shadow-inner mb-2">
+                    💌</div>
                 <div class="text-center">
                     <h3 class="text-4xl font-bold text-white mb-2 tracking-wide whitespace-nowrap">邀請家屬</h3>
                     <p class="text-xl text-pink-100 font-bold whitespace-nowrap">分享戰績給家人</p>
                 </div>
             </button>
-            
+
         </div>
 
         <!-- 邀請家屬確認彈窗 -->
         <div id="invite-modal" class="fixed inset-0 bg-black/80 flex items-center justify-center z-[200] hidden">
-            <div class="bg-zinc-800 rounded-3xl p-8 w-11/12 max-w-sm border-2 border-zinc-700 shadow-2xl transform transition-all">
+            <div
+                class="bg-zinc-800 rounded-3xl p-8 w-11/12 max-w-sm border-2 border-zinc-700 shadow-2xl transform transition-all">
                 <div class="text-6xl text-center mb-4">💌</div>
                 <h3 class="text-3xl font-bold text-center text-white mb-4">發送邀請</h3>
                 <p class="text-lg text-zinc-300 text-center mb-8">系統將開啟 LINE APP，請在裡面選擇您的家屬進行傳送。</p>
                 <div class="flex flex-col gap-4">
                     <div id="invite-btn-container"></div>
-                    <button onclick="closeInviteModal()" class="w-full bg-zinc-600 hover:bg-zinc-500 text-white font-bold py-4 rounded-2xl text-2xl transition-colors shadow-lg">
+                    <button onclick="closeInviteModal()"
+                        class="w-full bg-zinc-600 hover:bg-zinc-500 text-white font-bold py-4 rounded-2xl text-2xl transition-colors shadow-lg">
                         取消並返回
                     </button>
                 </div>
@@ -146,32 +240,44 @@
 
     <!-- ==================== VIEW: MAIN (CONNECT) ==================== -->
     <div id="view-main" class="view-container p-6">
-        <button onclick="switchView('view-dashboard')" class="absolute top-6 left-6 text-2xl text-zinc-400 bg-zinc-800 px-4 py-2 rounded-xl">返回大廳</button>
+
         <div id="s1" class="step active w-full">
             <h1 class="text-4xl text-green-400 mb-8">第一步</h1>
             <p class="text-3xl mb-10 text-center">請拿起設備<br><span class="text-yellow-400 font-bold">「輕點兩下」</span></p>
-            <button onclick="goConnectStep(2)" class="bg-green-500 px-10 py-5 rounded-2xl text-3xl font-bold">點好了</button>
+            <button onclick="goConnectStep(2)"
+                class="bg-green-500 px-10 py-5 rounded-2xl text-3xl font-bold">點好了</button>
         </div>
         <div id="s2" class="step w-full">
+            <button onclick="goConnectStep(1)" class="absolute top-6 left-6 text-2xl text-zinc-400 bg-zinc-800 px-4 py-2 rounded-xl">返回上一步</button>
             <h1 class="text-4xl text-green-400 mb-8">第二步</h1>
-            <button onclick="window.open('https://youtube.com/...')" class="bg-red-600 px-10 py-5 rounded-2xl text-2xl font-bold mb-6">觀看穿戴教學</button>
+            <button onclick="window.open('https://youtube.com/...')"
+                class="bg-red-600 px-10 py-5 rounded-2xl text-2xl font-bold mb-6">觀看穿戴教學</button>
             <p class="text-2xl text-zinc-400 mb-8">請確定束環已穿戴正確</p>
-            <button onclick="goConnectStep(3)" class="bg-green-500 px-10 py-5 rounded-2xl text-3xl font-bold">我穿好了</button>
+            <button onclick="goConnectStep(3)"
+                class="bg-green-500 px-10 py-5 rounded-2xl text-3xl font-bold">我穿好了</button>
         </div>
         <div id="s3" class="step w-full">
+            <button onclick="goConnectStep(2)" class="absolute top-6 left-6 text-2xl text-zinc-400 bg-zinc-800 px-4 py-2 rounded-xl">返回上一步</button>
             <h1 class="text-4xl text-green-400 mb-8">第三步</h1>
             <p class="text-3xl mb-10">請問穿戴在哪一邊？</p>
             <div class="flex gap-6 w-full max-w-md">
-                <button onclick="setL(4, 'L')" class="flex-1 bg-blue-600 py-8 rounded-2xl text-3xl font-bold">左邊</button>
-                <button onclick="setL(4, 'R')" class="flex-1 bg-orange-600 py-8 rounded-2xl text-3xl font-bold">右邊</button>
+                <button onclick="setL(4, 'L')"
+                    class="flex-1 bg-blue-600 py-8 rounded-2xl text-3xl font-bold">左邊</button>
+                <button onclick="setL(4, 'R')"
+                    class="flex-1 bg-orange-600 py-8 rounded-2xl text-3xl font-bold">右邊</button>
             </div>
         </div>
         <div id="s4" class="step w-full">
+            <button onclick="goConnectStep(3)" class="absolute top-6 left-6 text-2xl text-zinc-400 bg-zinc-800 px-4 py-2 rounded-xl">返回上一步</button>
             <h1 class="text-4xl text-green-400 mb-8">第四步</h1>
             <p class="text-3xl mb-10 text-center">請確認手機<br><span class="text-blue-400 font-bold">「藍牙」</span>已開啟</p>
-            <button onclick="goConnectStep(5)" class="bg-green-500 px-10 py-5 rounded-2xl text-3xl font-bold">已經打開了</button>
+            <button onclick="goConnectStep(5)"
+                class="bg-green-500 px-10 py-5 rounded-2xl text-3xl font-bold">已經打開了</button>
+            <button onclick="window.open('https://youtube.com/watch?v=placeholder')"
+                class="bg-blue-600 px-10 py-5 rounded-2xl text-2xl font-bold mt-6">開啟藍芽教學</button>
         </div>
         <div id="s5" class="step w-full">
+            <button onclick="goConnectStep(4)" class="absolute top-6 left-6 text-2xl text-zinc-400 bg-zinc-800 px-4 py-2 rounded-xl">返回上一步</button>
             <h1 class="text-4xl text-white mb-8">最後一步</h1>
             <button onclick="connDevice()" class="bg-green-500 px-10 py-5 rounded-2xl text-3xl font-bold">連結藍芽</button>
         </div>
@@ -181,10 +287,12 @@
     <div id="view-games" class="view-container p-8 h-screen min-w-[1024px] overflow-hidden">
         <div class="flex justify-between items-center mb-8">
             <div class="flex gap-4">
-                <button onclick="switchView('view-dashboard')" class="bg-zinc-700 hover:bg-zinc-600 text-white text-2xl font-bold py-4 px-8 rounded-2xl border-2 border-zinc-500 flex items-center gap-2 shadow-lg">
+                <button onclick="switchView('view-dashboard')"
+                    class="bg-zinc-700 hover:bg-zinc-600 text-white text-2xl font-bold py-4 px-8 rounded-2xl border-2 border-zinc-500 flex items-center gap-2 shadow-lg">
                     <span>⬅️</span> 返回大廳
                 </button>
-                <button id="btn-connect-second" onclick="connectSecondDevice()" class="bg-blue-600 hover:bg-blue-500 text-white text-2xl font-bold py-4 px-8 rounded-2xl border-2 border-blue-400 flex items-center gap-2 shadow-lg hidden">
+                <button id="btn-connect-second" onclick="connectSecondDevice()"
+                    class="bg-blue-600 hover:bg-blue-500 text-white text-2xl font-bold py-4 px-8 rounded-2xl border-2 border-blue-400 flex items-center gap-2 shadow-lg hidden">
                     <span>🔗</span> 連接第二台設備
                 </button>
             </div>
@@ -202,7 +310,8 @@
                 </div>
             </div>
             <!-- 右側：好友動態 -->
-            <div class="w-1/3 bg-zinc-800 rounded-3xl border-2 border-zinc-700 flex flex-col h-full overflow-hidden shadow-2xl mb-12">
+            <div
+                class="w-1/3 bg-zinc-800 rounded-3xl border-2 border-zinc-700 flex flex-col h-full overflow-hidden shadow-2xl mb-12">
                 <div class="bg-zinc-700 p-5 rounded-t-3xl border-b-2 border-zinc-600 shadow-md z-10">
                     <h2 class="text-3xl font-bold text-white flex items-center gap-3">
                         <span class="text-4xl">🔥</span> 好友最新動態
@@ -210,13 +319,15 @@
                 </div>
                 <div class="flex-1 overflow-y-auto p-5 space-y-5 no-scrollbar bg-zinc-800/50 pb-20">
                     <div class="bg-zinc-700/80 p-5 rounded-2xl flex items-center gap-5 border border-zinc-600">
-                        <div class="text-6xl bg-zinc-600 p-3 rounded-full border-4 border-green-500 shadow-inner">👵</div>
+                        <div class="text-6xl bg-zinc-600 p-3 rounded-full border-4 border-green-500 shadow-inner">👵
+                        </div>
                         <div class="flex-1">
                             <div class="flex justify-between items-end mb-2">
                                 <h3 class="text-3xl font-bold text-white">林阿嬤</h3>
                                 <span class="text-lg text-zinc-400">10分鐘前</span>
                             </div>
-                            <p class="text-xl text-zinc-300">玩了 <span class="text-orange-400 font-bold text-2xl">打地鼠</span></p>
+                            <p class="text-xl text-zinc-300">玩了 <span
+                                    class="text-orange-400 font-bold text-2xl">打地鼠</span></p>
                             <p class="text-3xl font-black text-yellow-400 mt-2 tracking-wide">85 分</p>
                         </div>
                     </div>
@@ -228,7 +339,8 @@
     <!-- ==================== VIEW: EXERCISE ==================== -->
     <div id="view-exercise" class="view-container p-6 relative min-h-screen">
         <div class="flex justify-between items-center mb-6 z-10">
-            <button onclick="switchView('view-games')" class="btn-press bg-zinc-700 text-white px-6 py-3 rounded-2xl text-xl font-bold border-b-4 border-zinc-900">
+            <button onclick="switchView('view-games')"
+                class="btn-press bg-zinc-700 text-white px-6 py-3 rounded-2xl text-xl font-bold border-b-4 border-zinc-900">
                 〈 放棄並返回
             </button>
             <h1 class="text-3xl font-bold tracking-widest text-orange-400" id="game-title">打地鼠</h1>
@@ -238,26 +350,31 @@
         <div id="game-play-area" class="flex-1 flex flex-col items-center justify-center gap-8">
             <div class="text-[8rem] animate-bounce" id="game-icon">🐹</div>
             <p class="text-3xl text-zinc-300 font-bold">連線接收數據中... (準備接收藍牙串流)</p>
-            
-            <button onclick="finishGame(85, 45.2)" class="bg-orange-500 text-white text-4xl font-bold px-12 py-8 rounded-[2rem] btn-press border-b-8 border-orange-700 shadow-xl mt-12">
+
+            <button onclick="finishGame(85, 45.2)"
+                class="bg-orange-500 text-white text-4xl font-bold px-12 py-8 rounded-[2rem] btn-press border-b-8 border-orange-700 shadow-xl mt-12">
                 模擬結束遊戲 (得分 85)
             </button>
         </div>
 
-        <div id="game-result-area" class="hidden flex-1 flex flex-col items-center justify-center w-full max-w-2xl mx-auto z-20">
-            <div class="bg-zinc-800 border-4 border-yellow-500 rounded-[3rem] p-12 w-full text-center shadow-2xl flex flex-col items-center">
+        <div id="game-result-area"
+            class="hidden flex-1 flex flex-col items-center justify-center w-full max-w-2xl mx-auto z-20">
+            <div
+                class="bg-zinc-800 border-4 border-yellow-500 rounded-[3rem] p-12 w-full text-center shadow-2xl flex flex-col items-center">
                 <div class="text-[6rem] mb-4">🎉</div>
                 <h2 class="text-5xl font-black text-white mb-2 tracking-widest">太棒了！</h2>
                 <p class="text-2xl text-zinc-400 font-bold mb-8">您已完成本次復健運動</p>
-                
+
                 <div class="bg-zinc-900 w-full py-8 rounded-3xl border-2 border-zinc-700 mb-8 shadow-inner">
                     <p class="text-zinc-500 font-bold text-xl mb-2">本次得分</p>
-                    <div class="text-[6rem] font-black text-yellow-400 drop-shadow-[0_0_15px_rgba(250,204,21,0.3)] leading-none">
+                    <div
+                        class="text-[6rem] font-black text-yellow-400 drop-shadow-[0_0_15px_rgba(250,204,21,0.3)] leading-none">
                         <span id="final-score">0</span>
                     </div>
                 </div>
 
-                <button onclick="switchView('view-dashboard')" class="w-full bg-emerald-500 text-white text-3xl font-bold py-6 rounded-2xl btn-press border-b-8 border-emerald-700">
+                <button onclick="switchView('view-dashboard')"
+                    class="w-full bg-emerald-500 text-white text-3xl font-bold py-6 rounded-2xl btn-press border-b-8 border-emerald-700">
                     返回大廳休息
                 </button>
             </div>
@@ -271,11 +388,11 @@
         // -----------------------------------------
         let globalDevice1 = null;
         let globalDevice2 = null;
-        
+
         function switchView(viewId) {
             document.querySelectorAll('.view-container').forEach(v => v.classList.remove('active-view'));
             document.getElementById(viewId).classList.add('active-view');
-            
+
             // 觸發生命週期
             if (viewId === 'view-dashboard') renderDeviceStatus();
             if (viewId === 'view-games') renderGames(localStorage.getItem('deviceMode'));
@@ -307,9 +424,9 @@
             document.getElementById('warning-sub').innerText = sub;
             toast.classList.remove('hidden');
             toast.classList.add('toast-enter');
-            
-            if(window.warningToastTimer) clearTimeout(window.warningToastTimer);
-            
+
+            if (window.warningToastTimer) clearTimeout(window.warningToastTimer);
+
             window.warningToastTimer = setTimeout(() => {
                 toast.style.transition = 'opacity 0.5s ease-out, transform 0.5s ease-out';
                 toast.style.opacity = '0';
@@ -325,7 +442,7 @@
             const disconnectedDevice = event.target;
             const firstDeviceId = localStorage.getItem('firstDeviceId');
             let limbName = "未知";
-            
+
             if (disconnectedDevice.id === firstDeviceId) {
                 const limb = localStorage.getItem('sensorLimb');
                 limbName = (limb === 'L') ? '左邊' : '右邊';
@@ -335,7 +452,7 @@
                 limbName = (limb2 === 'L') ? '左邊' : '右邊';
                 globalDevice2 = null;
             }
-            
+
             if (!globalDevice1 && !globalDevice2) {
                 localStorage.removeItem('deviceMode');
                 showWarningToast(`【${limbName}】感測器已斷線！`, "所有設備已失去連線，請更換電池並重新連線。");
@@ -343,7 +460,7 @@
                 localStorage.setItem('deviceMode', 'single');
                 showWarningToast(`【${limbName}】感測器已斷線！`, "系統已自動為您切換回單軸模式。");
             }
-            
+
             renderDeviceStatus();
             renderGames(localStorage.getItem('deviceMode'));
         }
@@ -354,7 +471,7 @@
         window.onload = async () => {
             // 頁面重整後，JavaScript 記憶體中的藍牙物件會遺失。因此必須清除殘留狀態，強制使用者重新連線。
             localStorage.removeItem('deviceMode');
-            
+
             try {
                 await liff.init({ liffId: "2009890664-Vovdl9LN" });
                 if (liff.isLoggedIn()) {
@@ -370,11 +487,29 @@
                 console.error("LIFF Init Error:", err);
             }
             renderDeviceStatus();
-            
+
+            const urlParams = new URLSearchParams(window.location.search);
+            const isFreshLogin = urlParams.get('login') === '1';
+
             const mode = localStorage.getItem('deviceMode');
             const hasConnectedBefore = localStorage.getItem('firstDeviceId');
-            if (!mode && !hasConnectedBefore) {
-                setTimeout(() => switchView('view-main'), 1500);
+            const savedStep = localStorage.getItem('currentSetupStep');
+            
+            // 如果有尚未完成的教學步驟、或是剛從 login.html 登入、或是從未連線過，則強制進入教學畫面
+            if (savedStep || isFreshLogin || (!mode && !hasConnectedBefore)) {
+                switchView('view-main');
+                if (savedStep) {
+                    goConnectStep(parseInt(savedStep));
+                } else {
+                    goConnectStep(1);
+                }
+                
+                // 移除 URL 參數，避免網頁重整時又進入教學
+                if (isFreshLogin) {
+                    window.history.replaceState({}, document.title, window.location.pathname);
+                }
+            } else {
+                switchView('view-dashboard');
             }
         };
 
@@ -426,7 +561,7 @@
             const statusEl = document.getElementById('device-status');
             const hintEl = document.getElementById('reconnect-hint');
             const measureBtn = document.getElementById('btn-measure');
-            
+
             if (!mode) {
                 statusEl.innerText = "尚未連線運動設備";
                 statusEl.className = "text-lg font-bold text-red-500";
@@ -489,13 +624,18 @@
                         contents: {
                             type: "bubble",
                             hero: { type: "image", url: "https://images.unsplash.com/photo-1556740714-a8395b3bf30f?w=800&q=80", size: "full", aspectRatio: "20:13", aspectMode: "cover" },
-                            body: { type: "box", layout: "vertical", contents: [
-                                { type: "text", text: "樂齡健康動", weight: "bold", size: "xl", color: "#22c55e" },
-                                { type: "text", text: "邀請您成為專屬健康守護者，隨時接收長輩的運動戰績與進度！", wrap: true, margin: "md", color: "#666666" }
-                            ]},
-                            footer: { type: "box", layout: "vertical", contents: [
-                                { type: "button", style: "primary", color: "#22c55e", action: { type: "uri", label: "點此接受邀請", uri: inviteUrl } }
-                            ]}
+                            body: {
+                                type: "box", layout: "vertical", contents: [
+                                    { type: "text", text: "樂齡健康動", weight: "bold", size: "xl", color: "#22c55e" },
+                                    { type: "text", text: "邀請您成為專屬健康守護者，隨時接收長輩的運動戰績與進度！", wrap: true, margin: "md", color: "#666666" }
+                                ]
+                            },
+                            footer: {
+                                type: "box", layout: "vertical", spacing: "sm", contents: [
+                                    { type: "button", style: "primary", color: "#22c55e", action: { type: "uri", label: "1️⃣ 點此接受綁定邀請", uri: inviteUrl } },
+                                    { type: "button", style: "secondary", action: { type: "uri", label: "2️⃣ 加入官方客服(接收通知)", uri: "https://line.me/R/ti/p/@476fkwza" } }
+                                ]
+                            }
                         }
                     }]);
                     if (result) { alert("邀請卡片已成功發送！"); closeInviteModal(); }
@@ -508,39 +648,41 @@
         // -----------------------------------------
         // 4. Main (Connect) 邏輯
         // -----------------------------------------
-        function goConnectStep(n) { 
-            document.querySelectorAll('.step').forEach(s => s.classList.remove('active')); 
-            document.getElementById('s'+n).classList.add('active'); 
+        function goConnectStep(n) {
+            document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
+            document.getElementById('s' + n).classList.add('active');
+            localStorage.setItem('currentSetupStep', n);
         }
         function setL(n, l) { localStorage.setItem('sensorLimb', l); goConnectStep(n); }
         async function connDevice() {
             try {
-                const device = await navigator.bluetooth.requestDevice({ 
-                    filters: [{ namePrefix: 'KneeHow' }], 
-                    optionalServices: ['00000001-0000-1000-8000-00805f9b34fb'] 
+                const device = await navigator.bluetooth.requestDevice({
+                    filters: [{ namePrefix: 'KneeHow' }],
+                    optionalServices: ['00000001-0000-1000-8000-00805f9b34fb']
                 });
-                
+
                 document.getElementById('s5').innerHTML = '<h1 class="text-4xl text-white mb-8">連線中...</h1><p class="text-2xl text-yellow-400 animate-pulse">正在與設備建立藍牙通訊</p>';
                 await device.gatt.connect();
-                
+
                 if (device.id) localStorage.setItem('firstDeviceId', device.id);
-                localStorage.setItem('deviceMode', 'single'); 
-                
+                localStorage.setItem('deviceMode', 'single');
+                localStorage.removeItem('currentSetupStep'); // 連線成功，清除教學進度
+
                 globalDevice1 = device;
                 device.addEventListener('gattserverdisconnected', handleDisconnect);
-                
+
                 document.getElementById('s5').innerHTML = '<h1 class="text-4xl text-white mb-8">最後一步</h1><button onclick="connDevice()" class="bg-green-500 px-10 py-5 rounded-2xl text-3xl font-bold">連結藍芽</button>';
-                
+
                 const currentView = document.querySelector('.active-view');
-                if(currentView && currentView.id === 'view-main') {
+                if (currentView && currentView.id === 'view-main') {
                     switchView('view-dashboard');
                 } else {
                     renderDeviceStatus();
                     renderGames('single');
                 }
-            } catch (e) { 
+            } catch (e) {
                 console.error(e);
-                alert("連線取消或失敗，請重新嘗試。\n" + e.message); 
+                alert("連線取消或失敗，請重新嘗試。\n" + e.message);
                 document.getElementById('s5').innerHTML = '<h1 class="text-4xl text-white mb-8">最後一步</h1><button onclick="connDevice()" class="bg-green-500 px-10 py-5 rounded-2xl text-3xl font-bold">連結藍芽</button>';
             }
         }
@@ -581,7 +723,7 @@
             }
 
             const container = document.getElementById('games-container');
-            container.innerHTML = ''; 
+            container.innerHTML = '';
             const availableGames = gamesData.filter(game => mode === 'multi' ? game.type === 'both' : true);
             availableGames.forEach(game => {
                 container.innerHTML += `
@@ -596,17 +738,17 @@
 
         async function connectSecondDevice() {
             try {
-                const device = await navigator.bluetooth.requestDevice({ 
-                    filters: [{ namePrefix: 'KneeHow' }], 
-                    optionalServices: ['00000001-0000-1000-8000-00805f9b34fb'] 
+                const device = await navigator.bluetooth.requestDevice({
+                    filters: [{ namePrefix: 'KneeHow' }],
+                    optionalServices: ['00000001-0000-1000-8000-00805f9b34fb']
                 });
-                
+
                 const btnConnectSecond = document.getElementById('btn-connect-second');
                 const originalText = btnConnectSecond.innerHTML;
                 btnConnectSecond.innerHTML = '<span>⏳</span> 連線中...';
                 await device.gatt.connect();
                 btnConnectSecond.innerHTML = originalText;
-                
+
                 const firstDeviceId = localStorage.getItem('firstDeviceId');
                 if (firstDeviceId && device.id === firstDeviceId) {
                     alert("⚠️ 您選擇到已經連線的第一台感測器了！請重新選擇另一台。"); return;
@@ -616,19 +758,19 @@
                 if (firstLimb === 'L') secondLimb = 'R';
                 else if (firstLimb === 'R') secondLimb = 'L';
                 else { localStorage.setItem('sensorLimb', 'L'); secondLimb = 'R'; }
-                
+
                 localStorage.setItem('sensorLimb2', secondLimb);
-                localStorage.setItem('deviceMode', 'dual'); 
-                
+                localStorage.setItem('deviceMode', 'dual');
+
                 globalDevice2 = device;
                 device.addEventListener('gattserverdisconnected', handleDisconnect);
 
                 alert(`第二台設備連接成功！自動判別為：${secondLimb === 'L' ? '左邊' : '右邊'}`);
                 renderGames('dual');
-            } catch (e) { 
-                alert("連線取消或失敗，請重新嘗試。\n" + e.message); 
+            } catch (e) {
+                alert("連線取消或失敗，請重新嘗試。\n" + e.message);
                 const btnConnectSecond = document.getElementById('btn-connect-second');
-                if(btnConnectSecond) btnConnectSecond.innerHTML = '<span>🔗</span> 連接第二台設備';
+                if (btnConnectSecond) btnConnectSecond.innerHTML = '<span>🔗</span> 連接第二台設備';
             }
         }
 
@@ -678,4 +820,5 @@
         }
     </script>
 </body>
+
 </html>
