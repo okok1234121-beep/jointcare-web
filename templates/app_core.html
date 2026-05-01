@@ -352,6 +352,9 @@
         // 3. INIT & Dashboard 邏輯
         // -----------------------------------------
         window.onload = async () => {
+            // 頁面重整後，JavaScript 記憶體中的藍牙物件會遺失。因此必須清除殘留狀態，強制使用者重新連線。
+            localStorage.removeItem('deviceMode');
+            
             try {
                 await liff.init({ liffId: "2009890664-Vovdl9LN" });
                 if (liff.isLoggedIn()) {
@@ -374,6 +377,44 @@
                 setTimeout(() => switchView('view-main'), 1500);
             }
         };
+
+        // -----------------------------------------
+        // 4. 藍牙心跳檢測 (防止休眠/背景導致的無聲斷線)
+        // -----------------------------------------
+        function checkRealConnection() {
+            let mode = localStorage.getItem('deviceMode');
+            if (!mode) return;
+
+            let d1Alive = globalDevice1 && globalDevice1.gatt && globalDevice1.gatt.connected;
+            let d2Alive = globalDevice2 && globalDevice2.gatt && globalDevice2.gatt.connected;
+
+            if (mode === 'dual' || mode === 'multi') {
+                if (!d1Alive && !d2Alive) {
+                    globalDevice1 = null; globalDevice2 = null;
+                    localStorage.removeItem('deviceMode');
+                    showWarningToast("設備已斷線", "所有設備已失去連線，請重新連線。");
+                    renderDeviceStatus(); renderGames();
+                } else if (!d1Alive || !d2Alive) {
+                    if (!d1Alive) globalDevice1 = null;
+                    if (!d2Alive) globalDevice2 = null;
+                    localStorage.setItem('deviceMode', 'single');
+                    showWarningToast("部分設備斷線", "系統已自動為您切換回單軸模式。");
+                    renderDeviceStatus(); renderGames('single');
+                }
+            } else if (mode === 'single') {
+                if (!d1Alive && !d2Alive) {
+                    globalDevice1 = null; globalDevice2 = null;
+                    localStorage.removeItem('deviceMode');
+                    showWarningToast("設備已斷線", "感測器已失去連線，請重新連線。");
+                    renderDeviceStatus(); renderGames();
+                }
+            }
+        }
+
+        document.addEventListener("visibilitychange", () => {
+            if (document.visibilityState === 'visible') checkRealConnection();
+        });
+        setInterval(checkRealConnection, 3000);
 
         function updateProfileUI(name, picUrl) {
             if (name) document.getElementById('user-name').innerText = name;
