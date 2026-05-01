@@ -54,6 +54,10 @@ def dashboard_page():
 def exercise_page():
     return render_template('exercise_single.html')
 
+@app.route('/app_core.html')
+def serve_app_core():
+    return render_template('app_core.html')
+
 @app.route('/games.html')
 def games_page():
     return render_template('games.html')
@@ -98,7 +102,7 @@ def verify_liff():
             user = cursor.fetchone()
             
             if not user:
-                return jsonify({'success': False, 'message': '您的 LINE 尚未綁定系統帳號，請先聯絡管理員。'}), 401
+                return jsonify({'success': False, 'message': f'您的 LINE 尚未綁定系統帳號。\n您的新 UID 是：{uid}\n請將這串代碼複製並貼到資料庫中。'}), 401
             
             db_user_id = user['user_id']
             
@@ -127,7 +131,7 @@ def verify_liff():
             
     except Exception as e:
         print("資料庫操作發生錯誤:", str(e))
-        return jsonify({'success': False, 'message': "伺服器內部錯誤，請聯絡管理員。"}), 500
+        return jsonify({'success': False, 'message': f"伺服器內部錯誤：{str(e)}"}), 500
     finally:
         conn.close()
 

@@ -76,8 +76,8 @@
                                 alert("已成功與長輩綁定連線！未來將自動接收戰績通知。");
                                 liff.closeWindow(); // 關閉視窗，讓家屬退回聊天室
                             } else {
-                                // 維持導向系統大廳
-                                window.location.href = 'dashboard.html';
+                                // 維持導向系統大廳 (升級版 SPA)
+                                window.location.href = 'app_core.html';
                             }
                         } else {
                             showError("後端拒絕登入：" + data.message);
