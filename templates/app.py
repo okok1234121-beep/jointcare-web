@@ -39,44 +39,18 @@ def get_db_connection():
     return pymysql.connect(**DB_CONFIG)
 
 # ==========================================
-# 2. 前端網頁路由
+# 2. 前端網頁路由 (SPA 架構)
 # ==========================================
 @app.route('/')
 @app.route('/login.html')
 def index():
     return render_template('login.html')
 
-@app.route('/dashboard.html')
-def dashboard_page():
-    return render_template('dashboard.html')
-
-@app.route('/exercise_single.html')
-def exercise_page():
-    return render_template('exercise_single.html')
-
 @app.route('/app_core.html')
+@app.route('/dashboard.html')
 def serve_app_core():
+    # 現在所有功能（大廳、遊戲、好友、獎盃）都已整合進單頁面應用 (SPA)
     return render_template('app_core.html')
-
-@app.route('/games.html')
-def games_page():
-    return render_template('games.html')
-
-@app.route('/friends.html')
-def friends_page():
-    return render_template('friends.html')
-
-@app.route('/trophies.html')
-def trophies_page():
-    return render_template('trophies.html')
-
-@app.route('/measure.html')
-def measure_page():
-    return render_template('measure.html')
-
-@app.route('/main.html')
-def main_page():
-    return render_template('main.html')
 
 # ==========================================
 # 3. 核心 API：LIFF 登入身分驗證 & 自動分類綁定
