@@ -51,7 +51,8 @@
 
         /* Games styles */
         .game-card {
-            transition: transform 0.1s, box-shadow: 0 10px 0 rgba(0, 0, 0, 0.5);
+            transition: transform 0.1s;
+            box-shadow: 0 10px 0 rgba(0, 0, 0, 0.5);
         }
 
         .game-card:active {
@@ -146,10 +147,14 @@
             </div>
             <div class="flex-1 min-w-0">
                 <h2 class="text-3xl font-bold mb-1 truncate">您好，<span id="user-name" class="text-white">長輩</span></h2>
-                <div class="flex items-center gap-2">
-                    <p class="text-lg font-bold" id="device-status">讀取中...</p>
-                    <span id="reconnect-hint"
-                        class="hidden text-sm bg-red-500 px-2 py-1 rounded-lg animate-pulse">點我連線</span>
+                <div class="flex items-center gap-4 mt-1">
+                    <div class="flex items-center gap-2">
+                        <p class="text-lg font-bold" id="device-status">讀取中...</p>
+                        <span id="reconnect-hint" class="hidden text-sm bg-red-500 px-2 py-1 rounded-lg animate-pulse">點我連線</span>
+                    </div>
+                    <button id="btn-dashboard-connect-second" onclick="event.stopPropagation(); connectSecondDevice()" class="hidden bg-blue-600 hover:bg-blue-500 text-white text-sm font-bold py-2 px-4 rounded-xl border border-blue-400 shadow-md transition-colors flex items-center gap-2">
+                        <span>🔗</span> 連接第二台設備
+                    </button>
                 </div>
             </div>
             <!-- 登出按鈕移至右側 -->
@@ -163,16 +168,6 @@
         <div class="flex-1 flex flex-row items-center justify-center gap-6 w-full max-w-[95%] mx-auto"
             id="menu-container">
 
-            <button id="btn-measure" onclick="goTo('measure')"
-                class="giant-btn hidden-feature flex-1 min-w-[200px] h-full max-h-[400px] bg-indigo-500 rounded-[2rem] p-6 flex flex-col items-center justify-center gap-6 border-b-[10px] border-indigo-700">
-                <div
-                    class="text-[5rem] bg-indigo-400 w-32 h-32 rounded-3xl flex items-center justify-center shadow-inner mb-2">
-                    🩺</div>
-                <div class="text-center">
-                    <h3 class="text-4xl font-bold text-white mb-2 tracking-wide whitespace-nowrap">健康測量</h3>
-                    <p class="text-xl text-indigo-100 font-bold whitespace-nowrap">多軸專屬數據追蹤</p>
-                </div>
-            </button>
 
             <button onclick="goTo('games')"
                 class="giant-btn flex-1 min-w-[200px] h-full max-h-[400px] bg-orange-500 rounded-[2rem] p-6 flex flex-col items-center justify-center gap-6 border-b-[10px] border-orange-700">
@@ -285,12 +280,14 @@
 
     <!-- ==================== VIEW: GAMES ==================== -->
     <div id="view-games" class="view-container p-8 h-screen min-w-[1024px] overflow-hidden">
-        <div class="flex justify-between items-center mb-8">
-            <div class="flex gap-4">
+        <div class="grid grid-cols-3 items-center mb-8">
+            <div class="flex justify-start">
                 <button onclick="switchView('view-dashboard')"
                     class="bg-zinc-700 hover:bg-zinc-600 text-white text-2xl font-bold py-4 px-8 rounded-2xl border-2 border-zinc-500 flex items-center gap-2 shadow-lg">
                     <span>⬅️</span> 返回大廳
                 </button>
+            </div>
+            <div class="flex justify-center">
                 <button id="btn-connect-second" onclick="connectSecondDevice()"
                     class="bg-blue-600 hover:bg-blue-500 text-white text-2xl font-bold py-4 px-8 rounded-2xl border-2 border-blue-400 flex items-center gap-2 shadow-lg hidden">
                     <span>🔗</span> 連接第二台設備
@@ -381,6 +378,138 @@
         </div>
     </div>
 
+    <!-- ==================== VIEW: FRIENDS ==================== -->
+    <div id="view-friends" class="view-container relative flex-col pb-10 min-h-screen">
+        <div class="bg-zinc-800 p-4 sticky top-0 z-40 shadow-lg border-b-2 border-zinc-700 flex justify-between items-center mb-6">
+            <button onclick="switchView('view-dashboard')" class="btn-press bg-zinc-600 text-white px-6 py-3 rounded-2xl text-2xl font-bold border-b-4 border-zinc-800">
+                〈 返回大廳
+            </button>
+            <h1 class="text-3xl font-bold tracking-widest text-emerald-400">我的好友</h1>
+            <div class="w-32"></div> 
+        </div>
+
+        <div id="friends-gateway" class="flex-1 w-full max-w-5xl mx-auto p-6 flex flex-row items-center justify-center gap-6">
+            <button onclick="friendsApp.sendLineInvite()" class="giant-btn flex-1 bg-green-600 rounded-[2rem] p-6 flex flex-col items-center justify-center gap-4 border-b-[8px] border-green-800 h-[300px]">
+                <div class="text-6xl bg-green-500 p-4 rounded-3xl shadow-inner mb-2">💬</div>
+                <h2 class="text-3xl font-bold text-white tracking-widest text-center">LINE 邀請</h2>
+                <p class="text-lg text-green-100 font-bold text-center">傳送連結給家人</p>
+            </button>
+
+            <button onclick="friendsApp.openAddFriendModal()" class="giant-btn flex-1 bg-emerald-500 rounded-[2rem] p-6 flex flex-col items-center justify-center gap-4 border-b-[8px] border-emerald-700 h-[300px]">
+                <div class="text-6xl bg-emerald-400 p-4 rounded-3xl shadow-inner mb-2">➕</div>
+                <h2 class="text-3xl font-bold text-white tracking-widest text-center">加入號碼</h2>
+                <p class="text-lg text-emerald-100 font-bold text-center">輸入號碼連動</p>
+            </button>
+
+            <button onclick="friendsApp.showListView()" class="giant-btn flex-1 bg-indigo-500 rounded-[2rem] p-6 flex flex-col items-center justify-center gap-4 border-b-[8px] border-indigo-700 h-[300px]">
+                <div class="text-6xl bg-indigo-400 p-4 rounded-3xl shadow-inner mb-2">👥</div>
+                <h2 class="text-3xl font-bold text-white tracking-widest text-center">好友名單</h2>
+                <p class="text-lg text-indigo-100 font-bold text-center">查看大家戰績</p>
+            </button>
+        </div>
+
+        <div id="friends-list-view" class="hidden flex-1 w-full max-w-2xl mx-auto p-6 flex flex-col gap-6">
+            <button onclick="friendsApp.showGatewayView()" class="btn-press bg-zinc-700 text-white px-6 py-4 rounded-2xl text-2xl font-bold border-2 border-zinc-500 flex justify-center items-center gap-2 mb-2">
+                <span>⤴️</span> 回到選項
+            </button>
+
+            <div class="bg-zinc-800 rounded-3xl p-6 border-2 border-zinc-700 shadow-xl">
+                <h2 class="text-3xl text-zinc-100 font-bold mb-6 flex items-center gap-3">
+                    <span class="text-4xl">📋</span> 您的好友名單
+                </h2>
+                <div id="friends-list-container" class="flex flex-col gap-4">
+                    <div class="text-center text-zinc-500 text-2xl py-8 font-bold">資料載入中...</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 好友相關彈窗 -->
+    <div id="modal-add-friend" class="fixed inset-0 bg-black/90 z-[300] hidden flex items-center justify-center p-6 backdrop-blur-sm">
+        <div class="bg-zinc-800 border-4 border-emerald-500 rounded-[2.5rem] w-full max-w-lg p-8 shadow-2xl transform transition-transform scale-95 flex flex-col gap-6" id="add-friend-content">
+            <h2 class="text-4xl font-bold text-center text-white mb-2">新增好友</h2>
+            <div class="bg-zinc-900 rounded-3xl p-6 text-center border-2 border-zinc-700 flex justify-between items-center px-8">
+                <span class="text-2xl text-zinc-400">您的好友碼：</span>
+                <span class="text-5xl font-bold text-emerald-400 tracking-widest" id="my-uid-display">讀取中</span>
+            </div>
+            <hr class="border-zinc-600">
+            <div class="text-center">
+                <p class="text-2xl text-zinc-300 font-bold mb-4">請輸入朋友的好友碼：</p>
+                <input type="number" id="friend-uid-input" placeholder="例如：105" class="w-full bg-zinc-700 text-white text-4xl p-6 rounded-2xl border-4 border-zinc-600 focus:outline-none focus:border-emerald-500 text-center mb-6">
+            </div>
+            <div class="flex gap-4 mt-2">
+                <button onclick="friendsApp.closeAddFriendModal()" class="flex-1 bg-zinc-600 text-white text-3xl font-bold py-5 rounded-2xl btn-press border-b-8 border-zinc-800">取消</button>
+                <button onclick="friendsApp.processAddFriend()" class="flex-1 bg-emerald-500 text-white text-3xl font-bold py-5 rounded-2xl btn-press border-b-8 border-emerald-700">送出邀請</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="modal-incoming-request" class="fixed inset-0 bg-black/90 z-[300] hidden flex items-center justify-center p-6 backdrop-blur-sm">
+        <div class="bg-zinc-800 border-4 border-yellow-500 rounded-[2.5rem] w-full max-w-md p-8 text-center shadow-2xl transform transition-transform scale-95 flex flex-col gap-6" id="incoming-request-content">
+            <div class="text-8xl animate-bounce">🔔</div>
+            <h2 class="text-4xl font-bold text-yellow-400 mb-2">新的好友邀請！</h2>
+            <div class="bg-zinc-700 rounded-3xl p-6 border-2 border-zinc-600 mb-2">
+                <div class="text-5xl mb-4">👤</div>
+                <p class="text-3xl font-bold text-white" id="requester-name">讀取中...</p>
+                <p class="text-xl text-zinc-400 mt-2">好友碼: <span id="requester-id">---</span></p>
+            </div>
+            <p class="text-2xl text-zinc-300 font-bold">請問您是否同意加入？</p>
+            <div class="flex gap-4 mt-2">
+                <button onclick="friendsApp.rejectRequest()" class="flex-1 bg-zinc-600 text-white text-3xl font-bold py-5 rounded-2xl btn-press border-b-8 border-zinc-800">拒絕</button>
+                <button onclick="friendsApp.acceptRequest()" class="flex-1 bg-emerald-500 text-white text-3xl font-bold py-5 rounded-2xl btn-press border-b-8 border-emerald-700">🎉 同意</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="friends-system-modal" class="fixed inset-0 bg-black/90 z-[350] hidden flex items-center justify-center p-6 backdrop-blur-sm">
+        <div class="bg-zinc-800 border-4 border-zinc-600 rounded-[2rem] w-full max-w-md p-8 text-center shadow-2xl transform transition-transform scale-95" id="friends-modal-content">
+            <div class="text-7xl mb-6" id="friends-modal-icon">ℹ️</div>
+            <h3 class="text-3xl font-bold text-white mb-8 leading-relaxed" id="friends-modal-message">訊息內容</h3>
+            <div class="flex justify-center gap-4" id="friends-modal-buttons"></div>
+        </div>
+    </div>
+
+    <!-- ==================== VIEW: TROPHIES ==================== -->
+    <div id="view-trophies" class="view-container relative flex-col pb-10 min-h-screen">
+        <div class="bg-zinc-800 p-4 sticky top-0 z-40 shadow-lg border-b-2 border-zinc-700 flex justify-between items-center">
+            <button onclick="trophiesApp.goBack()" class="btn-press bg-zinc-600 text-white px-6 py-3 rounded-2xl text-2xl font-bold border-b-4 border-zinc-800">
+                〈 返回
+            </button>
+            <h1 class="text-3xl font-bold tracking-widest text-yellow-400" id="page-title">榮譽獎盃室</h1>
+            <div class="w-24"></div> 
+        </div>
+
+        <div class="flex-1 w-full max-w-md mx-auto p-6 flex flex-col items-center mt-4">
+            <div class="bg-zinc-800 rounded-3xl p-6 border-2 border-zinc-700 shadow-xl w-full text-center mb-8">
+                <h2 class="text-3xl font-bold text-white mb-2 flex items-center justify-center gap-2">
+                    <span>👑</span> <span id="section-title">我的典藏</span>
+                </h2>
+                <p class="text-xl text-zinc-400 font-bold" id="section-desc">點擊空的格子可以擺放獎盃喔！</p>
+            </div>
+
+            <div class="grid grid-cols-3 gap-4 w-full bg-zinc-800 p-5 rounded-[2.5rem] shadow-2xl border-4 border-yellow-900/50 aspect-square">
+                <button onclick="trophiesApp.handleTrophyClick(1, '🥇', '全勤王者', '連續運動 7 天達成！')" class="grid-item bg-zinc-700 rounded-3xl flex justify-center items-center text-[4rem] shadow-inner border-2 border-zinc-600">🥇</button>
+                <button onclick="trophiesApp.handleTrophyClick(2, null, null, null)" class="grid-item bg-zinc-700/50 rounded-3xl flex justify-center items-center text-5xl shadow-inner border-2 border-dashed border-zinc-500 text-zinc-600">➕</button>
+                <button onclick="trophiesApp.handleTrophyClick(3, '🌟', '星級玩家', '總分突破 10,000 分！')" class="grid-item bg-zinc-700 rounded-3xl flex justify-center items-center text-[4rem] shadow-inner border-2 border-zinc-600">🌟</button>
+                <button onclick="trophiesApp.handleTrophyClick(4, null, null, null)" class="grid-item bg-zinc-700/50 rounded-3xl flex justify-center items-center text-5xl shadow-inner border-2 border-dashed border-zinc-500 text-zinc-600">➕</button>
+                <button onclick="trophiesApp.handleTrophyClick(5, '🏆', '太極宗師', '太極推手完美通關！')" class="grid-item bg-yellow-900/40 rounded-3xl flex justify-center items-center text-[4.5rem] shadow-inner border-4 border-yellow-600">🏆</button>
+                <button onclick="trophiesApp.handleTrophyClick(6, null, null, null)" class="grid-item bg-zinc-700/50 rounded-3xl flex justify-center items-center text-5xl shadow-inner border-2 border-dashed border-zinc-500 text-zinc-600">➕</button>
+                <button onclick="trophiesApp.handleTrophyClick(7, null, null, null)" class="grid-item bg-zinc-700/50 rounded-3xl flex justify-center items-center text-5xl shadow-inner border-2 border-dashed border-zinc-500 text-zinc-600">➕</button>
+                <button onclick="trophiesApp.handleTrophyClick(8, null, null, null)" class="grid-item bg-zinc-700/50 rounded-3xl flex justify-center items-center text-5xl shadow-inner border-2 border-dashed border-zinc-500 text-zinc-600">➕</button>
+                <button onclick="trophiesApp.handleTrophyClick(9, null, null, null)" class="grid-item bg-zinc-700/50 rounded-3xl flex justify-center items-center text-5xl shadow-inner border-2 border-dashed border-zinc-500 text-zinc-600">➕</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="trophies-modal" class="fixed inset-0 bg-black/90 z-[300] hidden flex items-center justify-center p-6 backdrop-blur-sm">
+        <div class="bg-zinc-800 border-4 border-yellow-500 rounded-[2.5rem] w-full max-w-md p-8 text-center shadow-2xl transform transition-transform scale-95 flex flex-col gap-6" id="trophies-modal-content">
+            <div class="text-[6rem] mb-2 drop-shadow-2xl" id="trophies-modal-icon">🏆</div>
+            <h3 class="text-4xl font-bold text-white mb-2 tracking-wide" id="trophies-modal-title">獎盃名稱</h3>
+            <p class="text-2xl text-zinc-300 font-bold mb-6" id="trophies-modal-desc">獎盃描述內容...</p>
+            <div class="flex justify-center gap-4 mt-2" id="trophies-modal-buttons"></div>
+        </div>
+    </div>
+
     <!-- ==================== SCRIPTS ==================== -->
     <script>
         // -----------------------------------------
@@ -406,13 +535,29 @@
                 document.getElementById('game-result-area').classList.add('hidden');
                 document.getElementById('game-result-area').classList.remove('flex');
             }
+            if (viewId === 'view-friends') {
+                friendsApp.init();
+            }
+            if (viewId === 'view-trophies') {
+                if(!window.trophiesAppInitedFromFriends) {
+                     trophiesApp.init(); 
+                }
+                window.trophiesAppInitedFromFriends = false;
+            }
         }
 
         function goTo(pageName) {
             if (pageName === 'games') switchView('view-games');
-            else if (pageName === 'measure') window.location.href = 'measure.html';
-            else if (pageName === 'friends') window.location.href = 'friends.html';
-            else if (pageName === 'trophies') window.location.href = 'trophies.html';
+            else if (pageName === 'friends') switchView('view-friends');
+            else if (pageName === 'trophies') switchView('view-trophies');
+        }
+
+        function goToTrophies(friendId, friendName) {
+            if (window.trophiesApp) {
+                window.trophiesAppInitedFromFriends = true;
+                trophiesApp.init(friendId, friendName);
+            }
+            switchView('view-trophies');
         }
 
         // -----------------------------------------
@@ -523,7 +668,7 @@
             let d1Alive = globalDevice1 && globalDevice1.gatt && globalDevice1.gatt.connected;
             let d2Alive = globalDevice2 && globalDevice2.gatt && globalDevice2.gatt.connected;
 
-            if (mode === 'dual' || mode === 'multi') {
+            if (mode === 'dual') {
                 if (!d1Alive && !d2Alive) {
                     globalDevice1 = null; globalDevice2 = null;
                     localStorage.removeItem('deviceMode');
@@ -560,7 +705,7 @@
             const mode = localStorage.getItem('deviceMode');
             const statusEl = document.getElementById('device-status');
             const hintEl = document.getElementById('reconnect-hint');
-            const measureBtn = document.getElementById('btn-measure');
+            const btnConnectSecond = document.getElementById('btn-dashboard-connect-second');
 
             if (!mode) {
                 statusEl.innerText = "尚未連線運動設備";
@@ -571,22 +716,17 @@
                 } else {
                     hintEl.innerText = "點我連線";
                 }
-                measureBtn.classList.add('hidden-feature');
-            } else if (mode === 'multi') {
-                statusEl.innerText = "已連線：多軸設備 💪";
-                statusEl.className = "text-lg font-bold text-blue-400";
-                hintEl.classList.add('hidden');
-                measureBtn.classList.remove('hidden-feature');
+                if (btnConnectSecond) btnConnectSecond.classList.add('hidden');
             } else if (mode === 'dual') {
                 statusEl.innerText = "已連線：雙設備 🦯🦯";
                 statusEl.className = "text-lg font-bold text-green-400";
                 hintEl.classList.add('hidden');
-                measureBtn.classList.add('hidden-feature');
+                if (btnConnectSecond) btnConnectSecond.classList.add('hidden');
             } else if (mode === 'single') {
                 statusEl.innerText = "已連線：單軸設備 🦯";
                 statusEl.className = "text-lg font-bold text-green-400";
                 hintEl.classList.add('hidden');
-                measureBtn.classList.add('hidden-feature');
+                if (btnConnectSecond) btnConnectSecond.classList.remove('hidden');
             }
         }
 
@@ -700,10 +840,7 @@
         function renderGames(mode) {
             const badge = document.getElementById('mode-badge');
             const btnConnectSecond = document.getElementById('btn-connect-second');
-            if (mode === 'multi') {
-                badge.innerHTML = '<span class="text-blue-400 font-bold">🟢 多軸設備已就緒</span>';
-                if (btnConnectSecond) btnConnectSecond.classList.add('hidden');
-            } else if (mode === 'dual') {
+            if (mode === 'dual') {
                 badge.innerHTML = '<span class="text-green-400 font-bold">🟢 雙設備已就緒</span>';
                 if (btnConnectSecond) btnConnectSecond.classList.add('hidden');
             } else if (mode === 'single') {
@@ -724,7 +861,7 @@
 
             const container = document.getElementById('games-container');
             container.innerHTML = '';
-            const availableGames = gamesData.filter(game => mode === 'multi' ? game.type === 'both' : true);
+            const availableGames = gamesData;
             availableGames.forEach(game => {
                 container.innerHTML += `
                     <button onclick="startGame('${game.name}', '${game.icon}')" class="game-card w-full h-full ${game.bg} rounded-[2rem] p-4 flex flex-col items-center justify-center text-center border-4 ${game.border} ${game.shadow}">
@@ -767,6 +904,7 @@
 
                 alert(`第二台設備連接成功！自動判別為：${secondLimb === 'L' ? '左邊' : '右邊'}`);
                 renderGames('dual');
+                renderDeviceStatus();
             } catch (e) {
                 alert("連線取消或失敗，請重新嘗試。\n" + e.message);
                 const btnConnectSecond = document.getElementById('btn-connect-second');
@@ -818,6 +956,389 @@
                 }, 500);
             }, 5000);
         }
+
+        // -----------------------------------------
+        // 8. Friends 邏輯
+        // -----------------------------------------
+        const friendsApp = {
+            myUid: null,
+            pendingRequests: [],
+            friendsList: [],
+
+            init() {
+                this.myUid = localStorage.getItem('dbUserId');
+                if (!this.myUid) {
+                    document.getElementById('my-uid-display').innerText = "尚未同步";
+                    this.showSystemModal("⚠️", "找不到您的資料，請嘗試重新登入！", false);
+                    return;
+                }
+                document.getElementById('my-uid-display').innerText = this.myUid;
+                this.showGatewayView();
+                this.fetchFriendsData();
+            },
+
+            async sendLineInvite() {
+                const myName = localStorage.getItem('userName') || "您的家人";
+                if (!liff.isApiAvailable('shareTargetPicker')) {
+                    this.showSystemModal("📱", "請在手機的 LINE 裡面開啟，才能傳送邀請給好友喔！", false);
+                    return;
+                }
+                if (!this.myUid) {
+                    this.showSystemModal("⚠️", "系統尚未取得您的識別碼，請重新整理網頁。", false);
+                    return;
+                }
+
+                try {
+                    const result = await liff.shareTargetPicker([
+                        {
+                            "type": "flex", "altText": `${myName} 邀請您成為復健好友`,
+                            "contents": {
+                                "type": "bubble",
+                                "body": {
+                                    "type": "box", "layout": "vertical", "contents": [
+                                        { "type": "text", "text": "🏃 樂齡健康動", "weight": "bold", "color": "#22c55e", "size": "sm" },
+                                        { "type": "text", "text": "復健好友邀請", "weight": "bold", "size": "xl", "margin": "md" },
+                                        { "type": "text", "text": `${myName} 邀請您追蹤他的復健進度！點擊下方按鈕即可自動完成綁定。`, "wrap": true, "color": "#666666", "size": "sm", "margin": "md" }
+                                    ]
+                                },
+                                "footer": {
+                                    "type": "box", "layout": "vertical", "contents": [
+                                        { "type": "button", "action": { "type": "uri", "label": "接受邀請", "uri": `https://liff.line.me/2009890664-Vovdl9LN?invite_uid=${this.myUid}&invite_type=friend` }, "style": "primary", "color": "#22c55e" }
+                                    ]
+                                }
+                            }
+                        }
+                    ]);
+                    if (result) this.showSystemModal("✅", "邀請卡片已成功傳送！", false);
+                } catch (error) {
+                    console.error("shareTargetPicker error:", error);
+                    this.showSystemModal("❌", "分享動作發生系統錯誤，請聯絡管理員", false);
+                }
+            },
+
+            showListView() {
+                document.getElementById('friends-gateway').classList.add('hidden');
+                document.getElementById('friends-list-view').classList.remove('hidden');
+                window.scrollTo(0, 0);
+            },
+            showGatewayView() {
+                document.getElementById('friends-list-view').classList.add('hidden');
+                document.getElementById('friends-gateway').classList.remove('hidden');
+            },
+
+            async fetchFriendsData() {
+                const container = document.getElementById('friends-list-container');
+                container.innerHTML = `<div class="text-center text-zinc-400 text-2xl py-8 font-bold">正在與伺服器連線...</div>`;
+                try {
+                    const res = await fetch(`/api/friends/list?user_id=${this.myUid}`);
+                    const data = await res.json();
+                    if (data.success) {
+                        this.pendingRequests = data.pending;
+                        this.friendsList = data.friends;
+                        this.renderFriendsList();
+                        this.checkPendingRequests();
+                    } else {
+                        container.innerHTML = `<div class="bg-red-900/30 p-6 rounded-2xl border-2 border-red-500 shadow-inner text-red-200">連線錯誤: ${data.message}</div>`;
+                    }
+                } catch (err) {
+                    container.innerHTML = `<div class="bg-red-900/30 p-6 rounded-2xl border-2 border-red-500 shadow-inner text-red-200">網路異常無法連接</div>`;
+                }
+            },
+
+            renderFriendsList() {
+                const container = document.getElementById('friends-list-container');
+                container.innerHTML = ""; 
+                if (!this.friendsList || this.friendsList.length === 0) {
+                    container.innerHTML = `<div class="text-center text-zinc-400 text-2xl py-12 border-4 border-dashed border-zinc-600 rounded-3xl font-bold shadow-inner">名單空空的<br>趕快去加好友吧！</div>`;
+                    return;
+                }
+                this.friendsList.forEach(friend => {
+                    let recordsHtml = '';
+                    if (friend.records && friend.records.length > 0) {
+                        recordsHtml = friend.records.map(r => `
+                            <div class="flex justify-between items-center bg-zinc-900 p-4 rounded-2xl mb-3 border-2 border-zinc-700">
+                                <span class="text-zinc-400 text-xl font-bold">${r.date}</span>
+                                <span class="text-emerald-400 font-bold text-2xl">${r.game}</span>
+                                <span class="text-yellow-400 font-black text-2xl">${r.score} 分</span>
+                            </div>
+                        `).join('');
+                    } else {
+                        recordsHtml = `<div class="text-center text-zinc-500 py-4 text-xl font-bold">近七天無遊戲紀錄</div>`;
+                    }
+                    const card = document.createElement('div');
+                    card.className = "bg-zinc-700 rounded-3xl overflow-hidden border-2 border-zinc-600 shadow-lg mb-4";
+                    card.innerHTML = `
+                        <div class="p-6 flex justify-between items-center cursor-pointer active:bg-zinc-600 transition-colors" onclick="friendsApp.toggleRecords(${friend.id})">
+                            <div class="flex items-center gap-5">
+                                <div class="w-16 h-16 bg-zinc-500 rounded-full flex items-center justify-center text-4xl border-2 border-zinc-400">👤</div>
+                                <div>
+                                    <h3 class="text-3xl font-bold text-white mb-1">${friend.name}</h3>
+                                    <p class="text-zinc-400 text-lg font-bold">號碼: ${friend.id}</p>
+                                </div>
+                            </div>
+                            <div class="flex items-center gap-6">
+                                <span class="text-zinc-400 text-3xl transition-transform duration-300" id="arrow-${friend.id}">▼</span>
+                                <button onclick="event.stopPropagation(); friendsApp.confirmDelete(${friend.id}, '${friend.name}')" class="bg-red-500 text-white p-4 rounded-2xl btn-press border-b-4 border-red-700 shadow-md">🗑️</button>
+                            </div>
+                        </div>
+                        <div id="records-${friend.id}" class="hidden bg-zinc-800 p-6 border-t-4 border-zinc-600 transition-all">
+                            <h4 class="text-2xl text-zinc-300 font-bold mb-4 flex items-center gap-2"><span>🎮</span> 近七天成績</h4>
+                            ${recordsHtml}
+                            <div class="mt-6 pt-4 border-t-2 border-zinc-600 text-center">
+                                <button onclick="goToTrophies(${friend.id}, '${friend.name}')" class="w-full bg-yellow-600 text-white text-2xl font-bold py-4 rounded-2xl btn-press border-b-4 border-yellow-800 flex items-center justify-center gap-3 shadow-md">
+                                    <span>🏆</span> 查看他的獎盃室
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                    container.appendChild(card);
+                });
+            },
+
+            toggleRecords(friendId) {
+                const recordsDiv = document.getElementById(`records-${friendId}`);
+                const arrow = document.getElementById(`arrow-${friendId}`);
+                if (recordsDiv.classList.contains('hidden')) {
+                    recordsDiv.classList.remove('hidden');
+                    arrow.style.transform = "rotate(180deg)";
+                } else {
+                    recordsDiv.classList.add('hidden');
+                    arrow.style.transform = "rotate(0deg)";
+                }
+            },
+
+            checkPendingRequests() {
+                if (this.pendingRequests.length > 0) {
+                    const request = this.pendingRequests[0];
+                    document.getElementById('requester-name').innerText = request.name;
+                    document.getElementById('requester-id').innerText = request.id;
+                    const modal = document.getElementById('modal-incoming-request');
+                    const content = document.getElementById('incoming-request-content');
+                    modal.classList.remove('hidden');
+                    setTimeout(() => content.classList.replace('scale-95', 'scale-100'), 10);
+                }
+            },
+
+            async acceptRequest() {
+                const request = this.pendingRequests[0];
+                try {
+                    const res = await fetch('/api/friends/accept', {
+                        method: 'POST', headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ requester_id: request.id, receiver_id: this.myUid })
+                    });
+                    const data = await res.json();
+                    if (data.success) {
+                        this.pendingRequests.shift(); 
+                        this.closeIncomingRequestModal();
+                        await this.fetchFriendsData();
+                        setTimeout(() => { this.showSystemModal("🎉", `您與「${request.name}」已成為好友！`, false, () => this.checkPendingRequests()); }, 300);
+                    } else { this.showSystemModal("❌", "發生錯誤：" + data.message, false); }
+                } catch (err) { this.showSystemModal("❌", "網路異常，請稍後再試", false); }
+            },
+
+            async rejectRequest() {
+                const request = this.pendingRequests[0];
+                try {
+                    await fetch('/api/friends/remove', {
+                        method: 'POST', headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ user1_id: request.id, user2_id: this.myUid })
+                    });
+                    this.pendingRequests.shift();
+                    this.closeIncomingRequestModal();
+                    setTimeout(() => { this.checkPendingRequests(); }, 300);
+                } catch (err) { console.error(err); }
+            },
+
+            closeIncomingRequestModal() {
+                const modal = document.getElementById('modal-incoming-request');
+                const content = document.getElementById('incoming-request-content');
+                content.classList.replace('scale-100', 'scale-95');
+                setTimeout(() => modal.classList.add('hidden'), 150);
+            },
+
+            openAddFriendModal() {
+                document.getElementById('friend-uid-input').value = "";
+                const modal = document.getElementById('modal-add-friend');
+                const content = document.getElementById('add-friend-content');
+                modal.classList.remove('hidden');
+                setTimeout(() => content.classList.replace('scale-95', 'scale-100'), 10);
+            },
+            closeAddFriendModal() {
+                const modal = document.getElementById('modal-add-friend');
+                const content = document.getElementById('add-friend-content');
+                content.classList.replace('scale-100', 'scale-95');
+                setTimeout(() => modal.classList.add('hidden'), 150);
+            },
+
+            async processAddFriend() {
+                const targetId = document.getElementById('friend-uid-input').value;
+                if (!targetId) return this.showSystemModal("🤔", "請先輸入朋友的好友碼喔！", false);
+                if (targetId == this.myUid) return this.showSystemModal("😅", "不能加自己為好友啦！", false);
+
+                this.closeAddFriendModal();
+                this.showSystemModal("⏳", "正在傳送交友邀請...", false);
+
+                try {
+                    const res = await fetch('/api/friends/request', {
+                        method: 'POST', headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ requester_id: this.myUid, receiver_id: targetId })
+                    });
+                    const data = await res.json();
+                    if (data.success) { this.showSystemModal("✅", `已將邀請傳送給：${targetId}！`, false); } 
+                    else { this.showSystemModal("❌", "無法加入：" + data.message, false); }
+                } catch (err) { this.showSystemModal("❌", "網路異常，請稍後再試", false); }
+            },
+
+            confirmDelete(friendId, friendName) {
+                this.showSystemModal("🗑️", `確定要移除「${friendName}」嗎？`, true, async () => { 
+                    try {
+                        const res = await fetch('/api/friends/remove', {
+                            method: 'POST', headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ user1_id: this.myUid, user2_id: friendId })
+                        });
+                        const data = await res.json();
+                        if(data.success){
+                            await this.fetchFriendsData();
+                            this.showSystemModal("✅", "已成功移除好友！", false);
+                        } else { this.showSystemModal("❌", "移除失敗：" + data.message, false); }
+                    } catch(err) { this.showSystemModal("❌", "網路異常，請稍後再試", false); }
+                });
+            },
+
+            showSystemModal(icon, message, isConfirm = false, onConfirm = null) {
+                const modal = document.getElementById('friends-system-modal');
+                const content = document.getElementById('friends-modal-content');
+                document.getElementById('friends-modal-icon').innerText = icon;
+                document.getElementById('friends-modal-message').innerText = message;
+                
+                const btnContainer = document.getElementById('friends-modal-buttons');
+                btnContainer.innerHTML = ""; 
+
+                if (isConfirm) {
+                    const cancelBtn = document.createElement('button');
+                    cancelBtn.className = "flex-1 bg-zinc-600 text-white text-3xl font-bold py-5 rounded-2xl btn-press border-b-8 border-zinc-800";
+                    cancelBtn.innerText = "取消";
+                    cancelBtn.onclick = () => this.closeSystemModal();
+
+                    const confirmBtn = document.createElement('button');
+                    confirmBtn.className = "flex-1 bg-red-500 text-white text-3xl font-bold py-5 rounded-2xl btn-press border-b-8 border-red-700";
+                    confirmBtn.innerText = "確定";
+                    confirmBtn.onclick = () => {
+                        this.closeSystemModal();
+                        if (onConfirm) onConfirm();
+                    };
+                    btnContainer.appendChild(cancelBtn);
+                    btnContainer.appendChild(confirmBtn);
+                } else {
+                    const okBtn = document.createElement('button');
+                    okBtn.className = "w-full bg-emerald-500 text-white text-3xl font-bold py-5 rounded-2xl btn-press border-b-8 border-emerald-700";
+                    okBtn.innerText = "我知道了";
+                    okBtn.onclick = () => {
+                        this.closeSystemModal();
+                        if (onConfirm) onConfirm(); 
+                    };
+                    btnContainer.appendChild(okBtn);
+                }
+                modal.classList.remove('hidden');
+                setTimeout(() => content.classList.replace('scale-95', 'scale-100'), 10);
+            },
+            closeSystemModal() {
+                const modal = document.getElementById('friends-system-modal');
+                const content = document.getElementById('friends-modal-content');
+                content.classList.replace('scale-100', 'scale-95');
+                setTimeout(() => modal.classList.add('hidden'), 150);
+            }
+        };
+
+        // -----------------------------------------
+        // 9. Trophies 邏輯
+        // -----------------------------------------
+        const trophiesApp = {
+            isReadOnly: false,
+            returnTarget: 'view-dashboard',
+
+            init(friendId = null, friendName = null) {
+                if (friendName) {
+                    this.isReadOnly = true;
+                    this.returnTarget = 'view-friends';
+                    document.getElementById('page-title').innerText = `${friendName} 的獎盃室`;
+                    document.getElementById('section-title').innerText = `${friendName} 的典藏`;
+                    document.getElementById('section-desc').innerText = `來看看他收集了哪些耀眼的榮耀！`;
+                } else {
+                    this.isReadOnly = false;
+                    this.returnTarget = 'view-dashboard';
+                    document.getElementById('page-title').innerText = `榮譽獎盃室`;
+                    document.getElementById('section-title').innerText = `我的典藏`;
+                    document.getElementById('section-desc').innerText = `點擊空的格子可以擺放獎盃喔！`;
+                }
+            },
+
+            goBack() {
+                switchView(this.returnTarget);
+            },
+
+            handleTrophyClick(slotIndex, icon, title, desc) {
+                const modal = document.getElementById('trophies-modal');
+                const content = document.getElementById('trophies-modal-content');
+                const btnContainer = document.getElementById('trophies-modal-buttons');
+                
+                btnContainer.innerHTML = ""; 
+
+                const closeBtn = document.createElement('button');
+                closeBtn.className = "flex-1 bg-zinc-600 text-white text-3xl font-bold py-5 rounded-2xl btn-press border-b-8 border-zinc-800";
+                closeBtn.innerText = "關閉";
+                closeBtn.onclick = () => this.closeModal();
+
+                if (icon) {
+                    document.getElementById('trophies-modal-icon').innerText = icon;
+                    document.getElementById('trophies-modal-title').innerText = title;
+                    document.getElementById('trophies-modal-title').className = "text-4xl font-bold text-yellow-400 mb-2 tracking-wide";
+                    document.getElementById('trophies-modal-desc').innerText = desc;
+                    btnContainer.appendChild(closeBtn);
+
+                    if (!this.isReadOnly) {
+                        const unequipBtn = document.createElement('button');
+                        unequipBtn.className = "flex-1 bg-red-500 text-white text-3xl font-bold py-5 rounded-2xl btn-press border-b-8 border-red-700";
+                        unequipBtn.innerText = "卸下獎盃";
+                        unequipBtn.onclick = () => {
+                            alert(`(展示功能) 獎盃已從第 ${slotIndex} 格卸下！`);
+                            this.closeModal();
+                        };
+                        btnContainer.appendChild(unequipBtn);
+                    }
+                } else {
+                    document.getElementById('trophies-modal-icon').innerText = "📦";
+                    if (this.isReadOnly) {
+                        document.getElementById('trophies-modal-title').innerText = "空空如也";
+                        document.getElementById('trophies-modal-title').className = "text-4xl font-bold text-zinc-500 mb-2 tracking-wide";
+                        document.getElementById('trophies-modal-desc').innerText = "這個展示櫃目前還沒有放獎盃喔！";
+                        btnContainer.appendChild(closeBtn);
+                    } else {
+                        document.getElementById('trophies-modal-title').innerText = "空的展示櫃";
+                        document.getElementById('trophies-modal-title').className = "text-4xl font-bold text-zinc-300 mb-2 tracking-wide";
+                        document.getElementById('trophies-modal-desc').innerText = `這是您的第 ${slotIndex} 號展示櫃。\n快去倉庫挑選要擺放的獎盃吧！`;
+                        btnContainer.appendChild(closeBtn);
+                        const equipBtn = document.createElement('button');
+                        equipBtn.className = "flex-1 bg-emerald-500 text-white text-3xl font-bold py-5 rounded-2xl btn-press border-b-8 border-emerald-700";
+                        equipBtn.innerText = "挑選獎盃";
+                        equipBtn.onclick = () => {
+                            alert(`(展示功能) 開啟獎盃倉庫，準備擺放到第 ${slotIndex} 格！`);
+                            this.closeModal();
+                        };
+                        btnContainer.appendChild(equipBtn);
+                    }
+                }
+                modal.classList.remove('hidden');
+                setTimeout(() => content.classList.replace('scale-95', 'scale-100'), 10);
+            },
+
+            closeModal() {
+                const modal = document.getElementById('trophies-modal');
+                const content = document.getElementById('trophies-modal-content');
+                content.classList.replace('scale-100', 'scale-95');
+                setTimeout(() => modal.classList.add('hidden'), 150);
+            }
+        };
     </script>
 </body>
 
